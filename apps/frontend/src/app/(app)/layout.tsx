@@ -28,6 +28,8 @@ import { appDomain } from '@gitroom/helpers/utils/app.domain';
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
   const language = cookieStore.get(cookieName)?.value || fallbackLng;
+  // render the saved theme on the server so light mode doesn't flash dark first
+  const mode = cookieStore.get('mode')?.value === 'light' ? 'light' : 'dark';
   const Plausible = !!process.env.STRIPE_PUBLISHABLE_KEY
     ? PlausibleProvider
     : Fragment;
@@ -46,7 +48,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       </head>
       <ChangeDirClient />
       <body
-        className={clsx(brandFont.className, 'dark text-primary !bg-primary')}
+        className={clsx(brandFont.className, mode, 'text-primary !bg-primary')}
       >
         <VariableContextComponent
           storageProvider={
