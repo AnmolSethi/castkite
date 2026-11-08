@@ -482,7 +482,7 @@ export class OrganizationRepository {
   }
 
   async createOrgAndUser(
-    body: Omit<CreateOrgUserDto, 'providerToken'> & { providerId?: string },
+    body: Omit<CreateOrgUserDto, 'providerToken' | 'ageConfirmed'> & { providerId?: string },
     hasEmail: boolean,
     ip: string,
     userAgent: string

@@ -1027,5 +1027,6 @@
   "landing_terms": "Terms of Service",
   "landing_privacy": "Privacy Policy",
   "landing_source_code": "Source code",
-  "chrome_extension": "Castkite Chrome extension"
+  "chrome_extension": "Castkite Chrome extension",
+  "confirm_age_18": "I confirm that I am 18 or older"
 }

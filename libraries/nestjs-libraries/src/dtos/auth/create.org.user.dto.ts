@@ -1,4 +1,5 @@
 import {
+  Equals,
   IsDefined,
   IsEmail,
   IsString,
@@ -35,6 +36,10 @@ export class CreateOrgUserDto {
   @MinLength(3)
   @MaxLength(128)
   company: string;
+
+  // The terms set a minimum age of 18 (DPDP Act); sign-up requires the user to confirm it.
+  @Equals(true, { message: 'You must be 18 or older to sign up' })
+  ageConfirmed: boolean;
 
   datafast_visitor_id: string;
 }

@@ -37,6 +37,7 @@ type Inputs = {
   company: string;
   providerToken: string;
   provider: string;
+  ageConfirmed: boolean;
 };
 export function Register() {
   const getQuery = useSearchParams();
@@ -220,6 +221,23 @@ export function RegisterAfter({
                   type="text"
                   placeholder={t('label_company', 'Company')}
                 />
+              </div>
+              <div className="flex flex-col gap-[6px] text-[14px]">
+                <label className="flex items-center gap-[8px] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    {...form.register('ageConfirmed')}
+                    aria-invalid={!!form.formState.errors.ageConfirmed}
+                    aria-describedby="age-confirmed-error"
+                  />
+                  {t('confirm_age_18', 'I confirm that I am 18 or older')}
+                </label>
+                <div
+                  id="age-confirmed-error"
+                  className="text-red-400 text-[12px]"
+                >
+                  {form.formState.errors.ageConfirmed?.message}
+                </div>
               </div>
               <div className={clsx('text-[12px]')}>
                 {t(

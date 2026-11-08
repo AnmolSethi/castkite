@@ -1,9 +1,9 @@
 
-# Copilot Coding Agent Instructions for Postiz
+# Copilot Coding Agent Instructions for Castkite
 
 ## Project Architecture
 - Monorepo managed by NX, with apps in `apps/` and shared code in `libraries/`.
-- Main services: `frontend` (Next.js), `backend` (NestJS), `cron`, `commands`, `extension`, `sdk`, and `workers`.
+- Main services: `frontend` (Next.js), `backend` (NestJS), `cron`, `commands`, `extension`, and `workers`.
 - Data layer uses Prisma ORM (`libraries/nestjs-libraries/src/database/prisma/schema.prisma`) with PostgreSQL as the default database.
 - Redis (BullMQ) is used for queues and caching.
 - Email notifications via Resend.
@@ -29,7 +29,6 @@
 
 ## Integration Points
 - External APIs: Social media (Instagram, Facebook), Make.com, N8N, Resend, Stripe, etc.
-- SDK (`apps/sdk`) provides programmatic access to Postiz features.
 - Extension (`apps/extension`) is built with Vite, React, TypeScript, and Tailwind CSS.
 
 ## Key Files & Directories

@@ -94,8 +94,10 @@ Filled in for India on November 8, 2026. Before launch:
     Stripe only.
   - The Grievance Officer (anmol@castkite.com) acknowledges complaints within
     24 hours and resolves them within 15 days.
-- [ ] **Minimum age is 18** (DPDP Act parental-consent rule). Sign-up does not
-      check age; the terms state it.
+- [ ] **Minimum age is 18** (DPDP Act parental-consent rule). The sign-up form
+      requires an "I confirm that I am 18 or older" box, checked again by the
+      API. Accounts created by signing in with a wallet or Farcaster from the
+      login page skip that form, so they never confirm.
 - [ ] **Set up the mailboxes** `anmol@castkite.com` and `support@castkite.com`.
       Both are published on the legal pages and in the docs.
 
@@ -205,11 +207,9 @@ Typechecks pass, but these were never exercised in a running app:
 
 ## 6. Postiz leftovers (known, low risk)
 
-- **Agency review emails** link to `postiz.com/agencies/...`
-  (`libraries/nestjs-libraries/src/database/prisma/agencies/agencies.service.ts`).
-  Nothing in the app sends them today.
-- **`apps/sdk`** is Postiz's npm SDK and defaults to `api.postiz.com`. It is not
-  part of the hosted app.
+- **Removed:** Postiz's unused agency directory service (its emails linked to
+  `postiz.com`) and its npm SDK (`apps/sdk`). The `Agency` tables stay in the
+  schema so no data is dropped.
 - **`.github/workflows`** includes Postiz's container build, AWS deploy and
   extension publish workflows. GitHub Actions are disabled on the repository;
   delete or rewrite them before you turn Actions on.
