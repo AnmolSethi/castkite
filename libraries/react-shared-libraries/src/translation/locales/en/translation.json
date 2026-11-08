@@ -954,5 +954,7 @@
   "snippet_name": "Name (optional)",
   "snippet_name_placeholder": "e.g. Launch week hashtags",
   "snippet_placeholder": "Write hashtags, a caption or a sign-off...",
-  "insert_from_library": "Insert from library"
+  "insert_from_library": "Insert from library",
+  "snippet_content": "Content",
+  "snippet_auto_add": "Add to every new post automatically?"
 }

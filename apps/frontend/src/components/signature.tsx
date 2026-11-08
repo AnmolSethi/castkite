@@ -68,6 +68,13 @@ export const SignatureModal: FC<{
   close: () => void;
   appendSignature: (sign: string) => void;
 }> = (props) => {
-  const { appendSignature } = props;
-  return <SignaturesComponent appendSignature={appendSignature} />;
+  const { appendSignature, close } = props;
+  return (
+    <SignaturesComponent
+      appendSignature={(value) => {
+        appendSignature(value);
+        close();
+      }}
+    />
+  );
 };

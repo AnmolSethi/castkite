@@ -88,11 +88,14 @@ const readRows = (
   });
 };
 
-const ImportCsvModal: FC<{ onDone: () => void }> = ({ onDone }) => {
+// the modal renders outside the calendar context, so the channels come in as a prop
+const ImportCsvModal: FC<{
+  integrations: Integrations[];
+  onDone: () => void;
+}> = ({ integrations, onDone }) => {
   const t = useT();
   const fetch = useFetch();
   const toaster = useToaster();
-  const { integrations } = useCalendar();
   const [rows, setRows] = useState<ImportRow[]>([]);
   const [fileError, setFileError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -115,7 +118,9 @@ const ImportCsvModal: FC<{ onDone: () => void }> = ({ onDone }) => {
         setRows([]);
         return;
       }
-      setFileError(result.length ? '' : t('csv_no_rows', 'The file has no posts'));
+      setFileError(
+        result.length ? '' : t('csv_no_rows', 'The file has no posts')
+      );
       setRows(result);
     },
     [integrations, t]
@@ -250,11 +255,7 @@ const ImportCsvModal: FC<{ onDone: () => void }> = ({ onDone }) => {
         </div>
       )}
       <div className="flex justify-end">
-        <Button
-          loading={loading}
-          disabled={!ready.length}
-          onClick={submit}
-        >
+        <Button loading={loading} disabled={!ready.length} onClick={submit}>
           {t('csv_schedule_count', 'Schedule {{count}} posts', {
             count: ready.length,
           })}
@@ -267,7 +268,7 @@ const ImportCsvModal: FC<{ onDone: () => void }> = ({ onDone }) => {
 export const ImportCsvButton = () => {
   const t = useT();
   const modal = useModals();
-  const { reloadCalendarView } = useCalendar();
+  const { integrations, reloadCalendarView } = useCalendar();
 
   const open = useCallback(() => {
     modal.openModal({
@@ -277,9 +278,14 @@ export const ImportCsvButton = () => {
         modal: 'text-textColor',
       },
       size: 'xl',
-      children: <ImportCsvModal onDone={reloadCalendarView} />,
+      children: (
+        <ImportCsvModal
+          integrations={integrations}
+          onDone={reloadCalendarView}
+        />
+      ),
     });
-  }, [modal, t, reloadCalendarView]);
+  }, [modal, t, integrations, reloadCalendarView]);
 
   return (
     <button
