@@ -62,6 +62,7 @@ Last updated: November 8, 2026.
   | `EXTENSION_ID` | Your Chrome Web Store extension ID (section 3). Install links stay hidden until it is set |
   | `YOUTUBE_CLIENT_ID`, `GITHUB_CLIENT_ID`, `LINKEDIN_CLIENT_ID`, `X_CLIENT_ID` (and their secrets) | Sign-in buttons (see "Sign-in providers" below). The buttons always show, so set all four |
   | `JWT_SECRET` | A long random string, never the example value |
+  | `RUN_CRON` | `true` on the backend. Without it the 30-day purge (section 2) never runs |
 
 ### Sign-in providers
 
@@ -139,8 +140,10 @@ Filled in for India on November 8, 2026. Before launch:
 
 Merged from the `purge-deleted-organizations` branch.
 
-- A daily Temporal workflow, `purgeDeletedOrganizationsWorkflow`, starts with
-  the orchestrator.
+- A daily Temporal workflow, `purgeDeletedOrganizationsWorkflow`, runs on the
+  orchestrator. The backend starts it on boot **only when `RUN_CRON` is set**
+  (the same goes for Postiz's missed-post job). Upstream never set it, so both
+  jobs were off by default.
 - It finds organizations whose `deletedAt` is more than 30 days old and, per
   organization, in one transaction: deletes their content children-first,
   removes their media files from storage, anonymizes the organization row and
@@ -155,9 +158,12 @@ Before launch:
 - [ ] **Its unit test has not run.** `jest.config.ts` needs `@nx/jest`, which
       is not installed, so `organization.repository.spec.ts` could not run
       here. Typechecks pass.
-- [ ] **It has never run against a real database.** Run it once against a copy
-      of production data (or a staging database with deleted test
-      organizations) and confirm what was removed and what was kept.
+- [x] **Ran against a local database** on November 8, 2026: a workspace
+      deleted 31 days earlier lost its posts, channels, media and members, the
+      row was anonymized with `purgedAt` set, and another workspace was left
+      untouched.
+- [ ] Run it once against a copy of production data (or a staging database)
+      before launch and confirm what was removed and what was kept.
 - [ ] Make sure the orchestrator (Temporal worker) runs in production; without
       it nothing is purged and the privacy policy is false.
 
@@ -215,10 +221,16 @@ changes the app's lockfile.
 
 ## 5. Not tested yet
 
-Typechecks pass, but these were never exercised in a running app:
+Checked in a full local run on November 8, 2026 (backend, orchestrator,
+Temporal, Redis, Postgres): email sign-up with the 18+ box, bulk CSV import as
+admin and as a member (the member's post waited for approval, then got
+scheduled), the Approvals page, and light mode on the calendar and Approvals.
+X posts imported from CSV now default to "everyone can reply"; before, every X
+row was rejected.
 
-- [ ] Light and dark mode across the app.
-- [ ] Bulk CSV import end to end, after the channel lookup fix.
+Still never exercised in a running app:
+
+- [ ] Posting to a real channel (the local run used a fake one).
 - [ ] The landing page, `/terms` and `/privacy` in production (they were only
       checked on a local dev server, desktop and mobile).
 - [ ] Keyboard focus on the landing page.

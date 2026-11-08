@@ -29,7 +29,7 @@ When creating a post for X (Twitter), use the following settings schema:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `__type` | `string` | Yes | Must be `x` |
-| `who_can_reply_post` | `string` | Yes | Who can reply to the post |
+| `who_can_reply_post` | `string` | No | Who can reply to the post. Defaults to `everyone` |
 | `community` | `string` | No | X Community URL |
 | `made_with_ai` | `boolean` | No | Mark the post as containing AI-generated content. Defaults to `false` |
 | `paid_partnership` | `boolean` | No | Mark the post as a paid promotion. Defaults to `false` |
@@ -39,8 +39,8 @@ When creating a post for X (Twitter), use the following settings schema:
 | `article_cover` | `object` | No | Cover image for the article. Only used when `post_type` is `article` |
 
 <Note>
-`who_can_reply_post` is required for a normal post but ignored for an article,
-since X articles do not carry a reply setting.
+`who_can_reply_post` is ignored for an article, since X articles do not carry a
+reply setting.
 </Note>
 
 ### `post_type`

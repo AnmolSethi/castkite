@@ -20,9 +20,11 @@ export class XDto {
   })
   community?: string;
 
-  @ValidateIf((o) => o.post_type !== 'article')
+  // optional: the X provider treats a missing value as everyone (bulk CSV
+  // import sends no settings)
+  @IsOptional()
   @IsIn(['everyone', 'following', 'mentionedUsers', 'subscribers', 'verified'])
-  who_can_reply_post:
+  who_can_reply_post?:
     | 'everyone'
     | 'following'
     | 'mentionedUsers'
