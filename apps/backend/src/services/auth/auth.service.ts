@@ -20,10 +20,7 @@ export class AuthService {
     private _providerManager: AuthProviderManager
   ) {}
   async canRegister(provider: string) {
-    if (
-      process.env.DISABLE_REGISTRATION !== 'true' ||
-      provider === Provider.GENERIC
-    ) {
+    if (process.env.DISABLE_REGISTRATION !== 'true') {
       return true;
     }
 
@@ -331,7 +328,7 @@ export class AuthService {
     }
 
     const providerInstance = this._providerManager.getProvider(provider);
-    const token = await providerInstance.getToken(code, redirectUri);
+    const token = await providerInstance.getToken(code, redirectUri, state);
     const user = await providerInstance.getUser(token);
     if (!user) {
       throw new Error('Invalid user');

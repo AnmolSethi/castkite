@@ -1807,6 +1807,8 @@ enum Provider {
   FARCASTER
   WALLET
   GENERIC
+  LINKEDIN
+  X
 }
 
 enum Role {

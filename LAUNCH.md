@@ -43,7 +43,8 @@ Last updated: November 8, 2026.
   it.
 - [ ] **Apply the database schema** on the production database. This fork adds
       columns: `Organization.requireApproval`, `Organization.purgedAt`,
-      `Post.pendingApproval` (with an index) and `Signatures.name`.
+      `Post.pendingApproval` (with an index) and `Signatures.name`, and the
+      `LINKEDIN` and `X` sign-in providers.
 
   ```bash
   pnpm run prisma-db-push
@@ -59,7 +60,31 @@ Last updated: November 8, 2026.
   | `STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_SIGNING_KEY` | Billing. **The landing page only shows when `STRIPE_PUBLISHABLE_KEY` is set**, otherwise `/` goes straight to sign-in |
   | `EMAIL_FROM_ADDRESS` | Sender for all emails, and the recipient of agency review emails |
   | `EXTENSION_ID` | Your Chrome Web Store extension ID (section 3). Install links stay hidden until it is set |
+  | `YOUTUBE_CLIENT_ID`, `GITHUB_CLIENT_ID`, `LINKEDIN_CLIENT_ID`, `X_CLIENT_ID` (and their secrets) | Sign-in buttons (see "Sign-in providers" below). The buttons always show, so set all four |
   | `JWT_SECRET` | A long random string, never the example value |
+
+### Sign-in providers
+
+Sign-up and login offer Google, X, LinkedIn and GitHub (plus email and
+password). Each needs its developer app set up:
+
+- [ ] **Google** uses the YouTube OAuth client (`YOUTUBE_CLIENT_ID`). Add
+      `https://castkite.com/integrations/social/youtube` as a redirect URI and
+      publish the consent screen.
+- [ ] **X** uses OAuth 2.0 keys, which are different from `X_API_KEY`. In the X
+      developer portal, under User authentication settings, turn on OAuth 2.0
+      as a confidential web app and turn on **Request email from users** (X
+      needs your privacy and terms URLs for that). Add
+      `https://castkite.com/integrations/social/x` as a callback, then set
+      `X_CLIENT_ID` and `X_CLIENT_SECRET`.
+- [ ] **LinkedIn** uses the channel app (`LINKEDIN_CLIENT_ID`). Add the
+      **Sign In with LinkedIn using OpenID Connect** product to it. The redirect
+      `https://castkite.com/integrations/social/linkedin` is already registered
+      for channels.
+- [ ] **GitHub**: create an OAuth app with callback `https://castkite.com/settings`
+      and set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`.
+- [ ] Sign up once with each provider on production. None of them has been
+      tried against the real services yet.
 
 ### License (AGPL-3.0)
 
@@ -96,8 +121,7 @@ Filled in for India on November 8, 2026. Before launch:
     24 hours and resolves them within 15 days.
 - [ ] **Minimum age is 18** (DPDP Act parental-consent rule). The sign-up form
       requires an "I confirm that I am 18 or older" box, checked again by the
-      API. Accounts created by signing in with a wallet or Farcaster from the
-      login page skip that form, so they never confirm.
+      API, including for Google, X, LinkedIn and GitHub sign-ups.
 - [ ] **Set up the mailboxes** `anmol@castkite.com` and `support@castkite.com`.
       Both are published on the legal pages and in the docs.
 
@@ -208,7 +232,9 @@ Typechecks pass, but these were never exercised in a running app:
 ## 6. Postiz leftovers (known, low risk)
 
 - **Removed:** Postiz's unused agency directory service (its emails linked to
-  `postiz.com`) and its npm SDK (`apps/sdk`). The `Agency` tables stay in the
+  `postiz.com`), its npm SDK (`apps/sdk`), crypto wallet sign-in (with the
+  Solana packages) and generic OAuth/OIDC sign-in (the "Authentik" button).
+  The `Agency` tables and the `WALLET`/`GENERIC` provider values stay in the
   schema so no data is dropped.
 - **`.github/workflows`** includes Postiz's container build, AWS deploy and
   extension publish workflows. GitHub Actions are disabled on the repository;

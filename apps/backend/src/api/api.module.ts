@@ -51,10 +51,10 @@ import { AdminController } from '@gitroom/backend/api/routes/admin.controller';
 import { AuthProviderManager } from '@gitroom/backend/services/auth/providers/providers.manager';
 import { GithubProvider } from '@gitroom/backend/services/auth/providers/github.provider';
 import { GoogleProvider } from '@gitroom/backend/services/auth/providers/google.provider';
+import { LinkedinProvider } from '@gitroom/backend/services/auth/providers/linkedin.provider';
+import { XProvider } from '@gitroom/backend/services/auth/providers/x.provider';
 import { AppleProvider } from '@gitroom/backend/services/auth/providers/apple.provider';
 import { FarcasterProvider } from '@gitroom/backend/services/auth/providers/farcaster.provider';
-import { WalletProvider } from '@gitroom/backend/services/auth/providers/wallet.provider';
-import { OauthProvider } from '@gitroom/backend/services/auth/providers/oauth.provider';
 import { StripeController } from '@gitroom/backend/api/routes/stripe.controller';
 
 const authenticatedController = [
@@ -121,10 +121,10 @@ const authenticatedController = [
     AuthProviderManager,
     GithubProvider,
     GoogleProvider,
+    LinkedinProvider,
+    XProvider,
     AppleProvider,
     FarcasterProvider,
-    WalletProvider,
-    OauthProvider,
   ],
   get exports() {
     return [...this.imports, ...this.providers];

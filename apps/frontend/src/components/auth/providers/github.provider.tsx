@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback } from 'react';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
@@ -9,9 +11,10 @@ export const GithubProvider = () => {
     window.location.href = link;
   }, []);
   return (
-    <div
+    <button
+      type="button"
       onClick={gotoLogin}
-      className={`cursor-pointer bg-white h-[44px] rounded-[4px] flex justify-center items-center text-customColor16 gap-[4px]`}
+      className="cursor-pointer w-full bg-white h-[52px] rounded-[10px] flex justify-center items-center text-[#0E0E0E] gap-[8px] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
     >
       <div>
         <svg
@@ -27,7 +30,7 @@ export const GithubProvider = () => {
           />
         </svg>
       </div>
-      <div>{t('sign_in_with_github', 'Sign in with GitHub')}</div>
-    </div>
+      <div>{t('auth_method_github', 'GitHub')}</div>
+    </button>
   );
 };

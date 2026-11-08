@@ -1028,5 +1028,7 @@
   "landing_privacy": "Privacy Policy",
   "landing_source_code": "Source code",
   "chrome_extension": "Castkite Chrome extension",
-  "confirm_age_18": "I confirm that I am 18 or older"
+  "confirm_age_18": "I confirm that I am 18 or older",
+  "auth_method_x": "X",
+  "auth_method_linkedin": "LinkedIn"
 }

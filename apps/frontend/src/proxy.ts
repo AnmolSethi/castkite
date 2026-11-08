@@ -96,17 +96,19 @@ export async function proxy(request: NextRequest) {
   const org = nextUrl.searchParams.get('org');
   const url = new URL(nextUrl).search;
   if (!nextUrl.pathname.startsWith('/auth') && !authCookie) {
-    const providers = ['google', 'settings'];
-    const findIndex = providers.find((p) => nextUrl.href.indexOf(p) > -1);
-    const additional = !findIndex
+    // sign-in providers return to their channel integration's redirect URI
+    const loginProvider = nextUrl.pathname === '/integrations/social/linkedin'
+      ? 'LINKEDIN'
+      : nextUrl.pathname === '/integrations/social/x'
+      ? 'X'
+      : nextUrl.href.indexOf('google') > -1
+      ? 'GOOGLE'
+      : nextUrl.href.indexOf('settings') > -1
+      ? 'GITHUB'
+      : '';
+    const additional = !loginProvider
       ? ''
-      : (url.indexOf('?') > -1 ? '&' : '?') +
-        `provider=${(findIndex === 'settings'
-          ? process.env.POSTIZ_GENERIC_OAUTH
-            ? 'generic'
-            : 'github'
-          : findIndex
-        ).toUpperCase()}`;
+      : (url.indexOf('?') > -1 ? '&' : '?') + `provider=${loginProvider}`;
     return NextResponse.redirect(
       new URL(`/auth${url}${additional}`, nextUrl.href)
     );

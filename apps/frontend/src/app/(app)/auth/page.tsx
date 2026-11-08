@@ -4,7 +4,6 @@ import { Register } from '@gitroom/frontend/components/auth/register';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getT } from '@gitroom/react/translation/get.translation.service.backend';
-import { LoginWithOidc } from '@gitroom/frontend/components/auth/login.with.oidc';
 export const metadata: Metadata = {
   title: `Castkite Register`,
   description: '',
@@ -17,16 +16,13 @@ export default async function Auth(params: {searchParams: Promise<{provider: str
     ).register;
     if (!canRegister && !(await params?.searchParams)?.provider) {
       return (
-        <>
-          <LoginWithOidc />
-          <div className="text-center">
-            {t('registration_is_disabled', 'Registration is disabled')}
-            <br />
-            <Link className="underline hover:font-bold" href="/auth/login">
-              {t('login_instead', 'Login instead')}
-            </Link>
-          </div>
-        </>
+        <div className="text-center">
+          {t('registration_is_disabled', 'Registration is disabled')}
+          <br />
+          <Link className="underline hover:font-bold" href="/auth/login">
+            {t('login_instead', 'Login instead')}
+          </Link>
+        </div>
       );
     }
   }
