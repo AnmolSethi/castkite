@@ -1,4 +1,7 @@
-import { PrismaRepository } from '@gitroom/nestjs-libraries/database/prisma/prisma.service';
+import {
+  PrismaRepository,
+  PrismaTransaction,
+} from '@gitroom/nestjs-libraries/database/prisma/prisma.service';
 import { appDomain } from '@gitroom/helpers/utils/app.domain';
 import { Role, ShortLinkPreference, SubscriptionTier } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
@@ -12,7 +15,10 @@ export class OrganizationRepository {
   constructor(
     private _organization: PrismaRepository<'organization'>,
     private _userOrg: PrismaRepository<'userOrganization'>,
-    private _user: PrismaRepository<'user'>
+    private _user: PrismaRepository<'user'>,
+    private _media: PrismaRepository<'media'>,
+    private _clippingClip: PrismaRepository<'clippingClip'>,
+    private _transaction: PrismaTransaction
   ) {}
 
   createMaxUser(id: string, name: string, saasName: string, email: string) {
@@ -666,6 +672,153 @@ export class OrganizationRepository {
         deletedAt: new Date(),
       },
     });
+  }
+
+  getOrganizationsToPurge(deletedBefore: Date, take: number, skip: number) {
+    return this._organization.model.organization.findMany({
+      where: {
+        deletedAt: { lt: deletedBefore },
+        purgedAt: null,
+      },
+      // stable order, the caller skips the ones that failed
+      orderBy: [{ deletedAt: 'asc' }, { id: 'asc' }],
+      select: { id: true },
+      take,
+      skip,
+    });
+  }
+
+  async getOrganizationFiles(orgId: string) {
+    const [media, clips] = await Promise.all([
+      this._media.model.media.findMany({
+        where: { organizationId: orgId },
+        select: { path: true, thumbnail: true },
+      }),
+      this._clippingClip.model.clippingClip.findMany({
+        where: { clipping: { organizationId: orgId } },
+        select: { path: true, thumbnail: true },
+      }),
+    ]);
+
+    return [...media, ...clips]
+      .flatMap((file) => [file.path, file.thumbnail])
+      .filter((path): path is string => !!path);
+  }
+
+  // Hard-deletes everything a soft-deleted organization owns, children first
+  // because no relation cascades. Kept on purpose: the organization row
+  // (anonymized, its paymentId is the Stripe customer), its Subscription and
+  // UsedCodes, which are billing records with no personal data
+  purgeOrganization(orgId: string) {
+    const byOrg = { organizationId: orgId };
+    const byPost = { post: byOrg };
+    const byIntegration = { integration: byOrg };
+
+    return this._transaction.model.$transaction(
+      async (tx) => {
+        // rows of other organizations that point at what is about to go
+        await tx.user.updateMany({
+          where: { picture: byOrg },
+          data: { pictureId: null },
+        });
+        await tx.socialMediaAgency.updateMany({
+          where: { logo: byOrg },
+          data: { logoId: null },
+        });
+        await tx.oAuthApp.updateMany({
+          where: { picture: byOrg },
+          data: { pictureId: null },
+        });
+        await tx.post.updateMany({
+          where: { submittedForOrganizationId: orgId },
+          data: { submittedForOrganizationId: null },
+        });
+
+        const comments = { OR: [byOrg, byPost] };
+        await tx.comments.updateMany({
+          where: comments,
+          data: { parentId: null },
+        });
+        await tx.comments.deleteMany({ where: comments });
+        await tx.errors.deleteMany({ where: { OR: [byOrg, byPost] } });
+        await tx.tagsPosts.deleteMany({
+          where: { OR: [byPost, { tag: { orgId } }] },
+        });
+        await tx.post.updateMany({
+          where: byOrg,
+          data: { parentPostId: null },
+        });
+        // shortcut: marketplace rows (MessagesGroup, Orders, OrderItems,
+        // PayoutProblems) are not removed, nothing writes them any more; if one
+        // exists the transaction fails, is logged and the organization is skipped
+        await tx.post.deleteMany({ where: byOrg });
+        await tx.tags.deleteMany({ where: { orgId } });
+
+        await tx.integrationsWebhooks.deleteMany({
+          where: { OR: [{ webhook: byOrg }, byIntegration] },
+        });
+        await tx.webhooks.deleteMany({ where: byOrg });
+        await tx.exisingPlugData.deleteMany({ where: byIntegration });
+        await tx.plugs.deleteMany({ where: { OR: [byOrg, byIntegration] } });
+        await tx.integration.deleteMany({ where: byOrg });
+        await tx.customer.deleteMany({ where: { orgId } });
+
+        await tx.clippingClip.deleteMany({ where: { clipping: byOrg } });
+        await tx.clipping.deleteMany({ where: byOrg });
+
+        await tx.oAuthSelfHostedAuthorization.deleteMany({
+          where: { oauthApp: byOrg },
+        });
+        await tx.oAuthAuthorization.deleteMany({
+          where: { OR: [byOrg, { oauthApp: byOrg }] },
+        });
+        await tx.oAuthApp.deleteMany({ where: byOrg });
+        await tx.media.deleteMany({ where: byOrg });
+
+        await tx.signatures.deleteMany({ where: byOrg });
+        await tx.sets.deleteMany({ where: byOrg });
+        await tx.autoPost.deleteMany({ where: byOrg });
+        await tx.thirdParty.deleteMany({ where: byOrg });
+        await tx.gitHub.deleteMany({ where: byOrg });
+        await tx.notifications.deleteMany({ where: byOrg });
+        await tx.credits.deleteMany({ where: byOrg });
+        await tx.userOrganization.deleteMany({ where: byOrg });
+
+        // agent chat memory, keyed by the organization id
+        const threads = (
+          await tx.mastra_threads.findMany({
+            where: { resourceId: orgId },
+            select: { id: true },
+          })
+        ).map((thread) => thread.id);
+        await tx.mastra_messages.deleteMany({
+          where: {
+            OR: [{ thread_id: { in: threads } }, { resourceId: orgId }],
+          },
+        });
+        await tx.mastra_thread_state.deleteMany({
+          where: { threadId: { in: threads } },
+        });
+        await tx.mastra_observational_memory.deleteMany({
+          where: { resourceId: orgId },
+        });
+        await tx.mastra_threads.deleteMany({ where: { resourceId: orgId } });
+        await tx.mastra_resources.deleteMany({ where: { id: orgId } });
+
+        await tx.organization.update({
+          where: { id: orgId },
+          data: {
+            name: 'Deleted organization',
+            description: null,
+            apiKey: null,
+            purgedAt: new Date(),
+          },
+          select: { id: true },
+        });
+      },
+      // a large workspace has many rows, the default 5s is not enough
+      { timeout: 300000 }
+    );
   }
 
   async deleteTeamMember(orgId: string, userId: string) {
