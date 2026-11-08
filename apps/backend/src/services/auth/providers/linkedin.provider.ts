@@ -59,9 +59,9 @@ export class LinkedinProvider extends AuthProviderAbstract {
       throw new HttpException('LinkedIn sign-in failed, please try again', 400);
     }
 
-    if (!data.email) {
+    if (!data.email || data.email_verified !== true) {
       throw new HttpException(
-        'Your LinkedIn account has no email address to sign in with',
+        'Your LinkedIn account has no verified email address to sign in with',
         400
       );
     }
