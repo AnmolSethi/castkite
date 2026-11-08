@@ -18,6 +18,7 @@ export class OrganizationRepository {
     private _user: PrismaRepository<'user'>,
     private _media: PrismaRepository<'media'>,
     private _clippingClip: PrismaRepository<'clippingClip'>,
+    private _post: PrismaRepository<'post'>,
     private _transaction: PrismaTransaction
   ) {}
 
@@ -703,6 +704,40 @@ export class OrganizationRepository {
     return [...media, ...clips]
       .flatMap((file) => [file.path, file.thumbnail])
       .filter((path): path is string => !!path);
+  }
+
+  // Paths are client-settable (thumbnail URL, /media/save-media name) and
+  // storage deletes by the last segment, so a key another organization still
+  // references is never ours to delete
+  async isFileUsedElsewhere(orgId: string, path: string) {
+    const key = path.split('/').pop();
+    if (!key) {
+      return true;
+    }
+
+    const suffix = { endsWith: `/${key}` };
+    const [media, clips, posts] = await Promise.all([
+      this._media.model.media.count({
+        where: {
+          organizationId: { not: orgId },
+          OR: [{ name: key }, { path: suffix }, { thumbnail: suffix }],
+        },
+      }),
+      this._clippingClip.model.clippingClip.count({
+        where: {
+          clipping: { organizationId: { not: orgId } },
+          OR: [{ path: suffix }, { thumbnail: suffix }],
+        },
+      }),
+      this._post.model.post.count({
+        where: {
+          organizationId: { not: orgId },
+          image: { contains: key },
+        },
+      }),
+    ]);
+
+    return media + clips + posts > 0;
   }
 
   // Hard-deletes everything a soft-deleted organization owns, children first

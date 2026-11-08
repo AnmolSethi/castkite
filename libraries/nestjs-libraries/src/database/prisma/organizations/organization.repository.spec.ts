@@ -35,7 +35,7 @@ describe('OrganizationRepository.purgeOrganization', () => {
     );
     const transaction = { model: { $transaction: (fn: any) => fn(tx) } };
     const repo = new (OrganizationRepository as any)(
-      ...Array(5).fill({}),
+      ...Array(6).fill({}),
       transaction
     );
     await repo.purgeOrganization('org');

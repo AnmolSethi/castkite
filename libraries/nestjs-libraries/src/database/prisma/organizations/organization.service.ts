@@ -259,6 +259,12 @@ export class OrganizationService {
           id
         )) {
           try {
+            if (
+              await this._organizationRepository.isFileUsedElsewhere(id, path)
+            ) {
+              this._logger.warn(`Kept file ${path} of ${id}, used elsewhere`);
+              continue;
+            }
             await this.storage.removeFile(path);
           } catch (err) {
             this._logger.error(`Could not remove file ${path} of ${id}`, err);
