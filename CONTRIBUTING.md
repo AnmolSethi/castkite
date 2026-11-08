@@ -4,7 +4,7 @@ Contributions are welcome - code, docs, whatever it might be! If this is your fi
 
 ## Read the developers guide
 
-The main documentation site has a [developer guide](https://docs.postiz.com/developer-guide) . That guide provides you a good understanding of the project structure, and how to setup your development environment. Read this document after you have read that guide. This document is intended to provide you a good understanding of how to submit your first contribution.
+The main documentation site has a [developer guide](https://docs.castkite.com/contributing/developer-guide) . That guide provides you a good understanding of the project structure, and how to setup your development environment. Read this document after you have read that guide. This document is intended to provide you a good understanding of how to submit your first contribution.
 
 ## Apply via the contribution form
 
@@ -67,6 +67,6 @@ This project follows a Fork/Feature Branch/Pull Request model. If you're not fam
 
 # Need Help?
 
-Again, do check the [developer guide](https://docs.postiz.com/developer-guide). Much of what you probably need to know is in there.
+Again, do check the [developer guide](https://docs.castkite.com/contributing/developer-guide). Much of what you probably need to know is in there.
 
-If you encounter any issues, please visit our [support page](https://docs.postiz.com/support) or check the community forums. Your contributions help make Postiz better!
+If you encounter any issues, please visit our [support page](https://docs.castkite.com/general/support) or check the community forums. Your contributions help make Postiz better!

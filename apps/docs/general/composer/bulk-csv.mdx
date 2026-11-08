@@ -1,0 +1,57 @@
+---
+title: Bulk scheduling from a CSV
+sidebarTitle: Bulk CSV import
+description: 'Schedule up to 500 posts at once from a spreadsheet'
+icon: 'file-csv'
+---
+
+**Where:** the Calendar, the **Bulk schedule from CSV** button under
+**Create Post**
+
+Plan a month of posts in a spreadsheet, export it as CSV and schedule all of it
+in one go.
+
+## The file
+
+The first row names the columns. Three are required, in any order:
+
+| Column | What goes in it |
+|---|---|
+| `date` | When to publish, like `2026-12-01 09:00`, in your timezone setting |
+| `channel` | The channel name as shown in the sidebar, or its channel ID |
+| `content` | The post text. Line breaks inside a quoted cell are kept |
+
+**Download template** in the dialog gives you a file with the right columns
+and an example row.
+
+One file can hold up to 500 posts. Each row is one post on one channel; to send
+the same text to three channels, use three rows.
+
+## Importing
+
+<Steps>
+  <Step title="Upload the file">
+    Pick the CSV. Castkite reads it in your browser and lists every row.
+  </Step>
+  <Step title="Check the preview">
+    Each row shows **Ready** or the reason it can't be scheduled: an unknown
+    or disabled channel, a date that is invalid or in the past, or empty
+    content. Fix those rows in your spreadsheet and upload again, or schedule
+    the ready ones now.
+  </Step>
+  <Step title="Schedule">
+    **Schedule N posts** creates them. Rows the server rejects, for example a
+    post that breaks a platform rule, stay on screen with the reason, so you
+    can fix only those.
+  </Step>
+</Steps>
+
+## Good to know
+
+- An import counts against the posts in your plan for the month. If the file
+  holds more posts than you have left, nothing is imported and Castkite tells
+  you.
+- If your organisation [requires approval](/general/approvals), imported posts
+  from members wait for an admin like any other post.
+- The content is plain text. Media, threads and per-channel settings are
+  added afterwards in the composer.

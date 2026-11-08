@@ -23,7 +23,7 @@
 
 <p align="center">
   <br />
-  <a href="https://docs.postiz.com" rel="dofollow"><strong>Explore the docs »</strong></a>
+  <a href="https://docs.castkite.com" rel="dofollow"><strong>Explore the docs »</strong></a>
   <br />
 
   <br />
@@ -36,7 +36,7 @@
   ·
   <a href="https://discord.postiz.com">Join Our Discord (devs only)</a>
   ·
-  <a href="https://docs.postiz.com/public-api">Public API</a><br />
+  <a href="https://docs.castkite.com/public-api/introduction">Public API</a><br />
 </p>
 <p align="center">
   <a href="https://www.npmjs.com/package/@postiz/node">NodeJS SDK</a>
@@ -130,7 +130,7 @@
 
 ## Quick Start
 
-To have the project up and running, please follow the [Quick Start Guide](https://docs.postiz.com/quickstart)
+To have the project up and running, please follow the [Quick Start Guide](https://docs.castkite.com/general/quickstart)
 
 ## Sponsor Postiz
 

@@ -1,0 +1,91 @@
+---
+title: Approvals
+description: 'Make team posts wait for an admin, or send a client a preview link'
+icon: 'circle-check'
+---
+
+There are two kinds of approval in Castkite: an approval workflow inside your
+team, and a preview link for people outside it.
+
+## Require approval before publishing
+
+**Where:** Settings, **Global Settings**, **Approval Workflow**
+
+Set **Require approval before publishing** to **Required for members** and
+every post a member schedules waits as a draft until an admin approves it.
+Admins and owners publish as usual.
+
+<Steps>
+  <Step title="A member schedules a post">
+    It is saved as a draft and marked **Needs approval** on the calendar. It
+    cannot publish yet.
+  </Step>
+  <Step title="An admin reviews it">
+    **Approvals** in the top menu lists every post waiting for review, with
+    its channel, date and author.
+  </Step>
+  <Step title="Approve or reject">
+    **Approve** schedules the post for its date. **Reject** sends it back to
+    drafts, where the member can edit it and schedule it again.
+  </Step>
+</Steps>
+
+Posts a member creates through a [bulk CSV import](/general/composer/bulk-csv)
+follow the same rule. Posts created with an API key do not, because the key acts
+for the whole organisation rather than for one member.
+
+## Sharing a post for client sign-off
+
+**Where:** the Calendar, hover a post, **Preview**
+
+Every post has a public preview page. Sending that link is how you get sign-off
+without giving anyone access to Castkite.
+
+## What the recipient sees
+
+- The post rendered as it will appear, including media and all thread parts.
+- The date it is scheduled for.
+- A comment box.
+
+They do not see your calendar, your other clients, your channels, or anything
+else in your organisation. No account is required.
+
+## Collecting feedback
+
+Comments left on the preview page come back to you, so a review cycle looks
+like:
+
+<Steps>
+  <Step title="Draft the week">
+    Write the posts and **Save as Draft** so nothing can publish while it is
+    under review.
+  </Step>
+  <Step title="Send the previews">
+    **Preview** on each post, copy the link, send them to the client.
+  </Step>
+  <Step title="Read the comments">
+    Feedback arrives against the post it belongs to, rather than in a thread
+    of email where nobody can tell which post is which.
+  </Step>
+  <Step title="Edit and schedule">
+    Apply the changes, then switch the drafts to scheduled.
+  </Step>
+</Steps>
+
+## A practical pattern for agencies
+
+Combine this with [client groups](/general/channels/customers):
+
+1. Group the client's channels under a customer.
+2. Filter the calendar to that customer.
+3. Draft their week.
+4. Send preview links for the posts that need sign-off.
+5. Schedule once approved.
+
+## Limits worth knowing
+
+- A preview link is not password protected. Anyone with the URL can read the
+  post and comment, so treat it as unlisted rather than private.
+- A preview link is a conversation, not a state: client comments do not block
+  publishing. For a post that must not go out unreviewed, use the approval
+  workflow above.
