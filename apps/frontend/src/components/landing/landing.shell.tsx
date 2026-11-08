@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { getT } from '@gitroom/react/translation/get.translation.service.backend';
 import { LogoTextComponent } from '@gitroom/frontend/components/ui/logo-text.component';
 
-export const SOURCE_URL = 'https://github.com/AnmolSethi/kitepost';
+export const SOURCE_URL = 'https://github.com/AnmolSethi/castkite';
 
 export const landingButton =
   'inline-flex items-center justify-center h-[52px] px-[24px] border-2 border-black bg-brand text-black text-[16px] font-[700] shadow-[4px_4px_0_0_#000] transition-[transform,box-shadow] duration-150 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#000] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-black';
