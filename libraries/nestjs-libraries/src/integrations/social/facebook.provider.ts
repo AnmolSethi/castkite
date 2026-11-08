@@ -94,7 +94,7 @@ export class FacebookProvider extends SocialAbstract implements SocialProvider {
       return {
         type: 'refresh-token' as const,
         value:
-          'Kitepost is not authorized to publish as this page, please reconnect the channel',
+          'Castkite is not authorized to publish as this page, please reconnect the channel',
       };
     }
 

@@ -194,7 +194,7 @@ const ImportCsvModal: FC<{
         )}{' '}
         <a
           href={templateHref}
-          download="kitepost-import-template.csv"
+          download="castkite-import-template.csv"
           className="underline font-[600]"
         >
           {t('csv_download_template', 'Download template')}

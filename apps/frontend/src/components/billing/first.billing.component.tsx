@@ -113,7 +113,7 @@ export const FirstBillingComponent = () => {
       <>
         <div className="text-[46px] font-[600] leading-[110%] tablet:text-[36px] mobile:!text-[30px] whitespace-pre-line text-balance">
           {t(
-            'billing_kitepost_headline',
+            'billing_castkite_headline',
             'Plan it. Queue it. Post everywhere.'
           )}
         </div>

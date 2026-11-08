@@ -721,7 +721,7 @@ export class OAuthService {
     } catch (err) {
       // timeout or network failure, fetch rejects instead of answering
       throw new HttpException(
-        'Could not reach HubSpot to finish installing Kitepost, please try again',
+        'Could not reach HubSpot to finish installing Castkite, please try again',
         HttpStatus.BAD_GATEWAY,
         { cause: err }
       );
@@ -730,7 +730,7 @@ export class OAuthService {
     if (!response.ok) {
       const value = await response.json().catch(() => null);
       throw new HttpException(
-        `Could not finish installing Kitepost in HubSpot${
+        `Could not finish installing Castkite in HubSpot${
           value?.message ? `: ${value.message}` : ''
         }`,
         HttpStatus.BAD_REQUEST

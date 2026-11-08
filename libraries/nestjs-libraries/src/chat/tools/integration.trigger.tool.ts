@@ -130,7 +130,7 @@ export class IntegrationTriggerTool implements AgentToolInterface {
                   getIntegration
                 );
                 throw new Error(
-                  'The channel was disconnected because its token expired, the user needs to reconnect it in Kitepost'
+                  'The channel was disconnected because its token expired, the user needs to reconnect it in Castkite'
                 );
               }
 
@@ -149,7 +149,7 @@ export class IntegrationTriggerTool implements AgentToolInterface {
 
             if (err instanceof RefreshToken) {
               throw new Error(
-                'The provider rejected the credentials even after refreshing the token, the user needs to reconnect the channel in Kitepost'
+                'The provider rejected the credentials even after refreshing the token, the user needs to reconnect the channel in Castkite'
               );
             }
 

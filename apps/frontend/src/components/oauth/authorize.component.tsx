@@ -223,7 +223,7 @@ export const OAuthAuthorize: FC<{ logged: boolean }> = ({ logged }) => {
             <>
               <div className="border-t border-[#2A2929] pt-[16px]">
                 <div className="text-[14px] text-gray-400 mb-[12px]">
-                  This application is requesting access to your Kitepost
+                  This application is requesting access to your Castkite
                   account. It will be able to:
                 </div>
                 <ul className="text-[14px] list-disc list-inside space-y-[4px]">
@@ -255,7 +255,7 @@ export const OAuthAuthorize: FC<{ logged: boolean }> = ({ logged }) => {
                   onClick={signIn}
                   className="bg-brand hover:bg-brand/85 text-black rounded-[8px] py-[10px] px-[16px] text-[14px] font-semibold transition-colors"
                 >
-                  Sign in to Kitepost
+                  Sign in to Castkite
                 </button>
               )}
 

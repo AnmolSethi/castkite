@@ -17,7 +17,7 @@ import { CreationMethodBadge } from '@gitroom/frontend/components/launches/creat
 
 dayjs.extend(utc);
 export const metadata: Metadata = {
-  title: `Kitepost Preview`,
+  title: `Castkite Preview`,
   description: '',
 };
 export default async function Auth(
@@ -59,7 +59,7 @@ export default async function Auth(
             className="flex items-center gap-[10px] text-textColor"
           >
             <div className="w-[44px]">
-              <SafeImage src={'/kitepost.svg'} width={44} height={44} alt="Kitepost" />
+              <SafeImage src={'/castkite.svg'} width={44} height={44} alt="Castkite" />
             </div>
             <div>
               <svg

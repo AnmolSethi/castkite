@@ -32,7 +32,7 @@ export const Onboarding: FC = () => {
     }
     modalOpen.current = true;
     modal.openModal({
-      // title: t('onboarding', 'Welcome to Kitepost'),
+      // title: t('onboarding', 'Welcome to Castkite'),
       withCloseButton: true,
       closeOnEscape: false,
       removeLayout: true,

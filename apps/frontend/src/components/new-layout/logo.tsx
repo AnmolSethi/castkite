@@ -9,7 +9,7 @@ export const Logo = () => {
       viewBox="0 0 60 60"
       fill="none"
       role="img"
-      aria-label="Kitepost"
+      aria-label="Castkite"
       className="mt-[8px] min-w-[60px] min-h-[60px]"
     >
       <rect x="10" y="10" width="44" height="44" fill="#000000" />

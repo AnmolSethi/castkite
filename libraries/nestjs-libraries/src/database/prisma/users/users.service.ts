@@ -68,8 +68,8 @@ export class UsersService {
           this._notificationService
             .sendEmail(
               account.email,
-              'Your Kitepost login was changed',
-              `An administrator changed the login for your Kitepost account. ` +
+              'Your Castkite login was changed',
+              `An administrator changed the login for your Castkite account. ` +
                 `You can now sign in using ${account.email}. ` +
                 `Your subscription and plan were not changed by this switch — ` +
                 `if you intended to cancel a subscription, please do that ` +

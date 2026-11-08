@@ -21,7 +21,7 @@ export const remoteMcpClients = {
 } as const;
 
 // Official one-click connectors listed in the assistants' directories, they
-// point at the public MCP server: the hosted Kitepost (billingEnabled), or a
+// point at the public MCP server: the hosted Castkite (billingEnabled), or a
 // self-hosted install through "Use self-hosted" on its sign-in page.
 export const mcpConnectorUrls = {
   Claude: 'https://claude.ai/directory/postiz',
@@ -57,7 +57,7 @@ export type ChatOnlyMcpClient = keyof typeof chatOnlyMcpClients;
 export type McpClient = (typeof mcpClients)[number];
 export type AnyMcpClient = RemoteMcpClient | ChatOnlyMcpClient | McpClient;
 
-// oauth: no API key, the client registers itself (DCR) and the user signs in to Kitepost
+// oauth: no API key, the client registers itself (DCR) and the user signs in to Castkite
 // apikey: the organization API key, as a Bearer header (or inside the URL for remote clients)
 export type McpAuth = 'oauth' | 'apikey';
 
@@ -167,7 +167,7 @@ export const getMcpConfig = (
       case 'NanoClaw':
         return {
           config: `ncl groups config add-mcp-server --id <group-id> --name postiz --url ${oauthUrl}`,
-          hint: 'Run this in your terminal, replace <group-id> with the agent group that should get Kitepost.',
+          hint: 'Run this in your terminal, replace <group-id> with the agent group that should get Castkite.',
         };
     }
   }
@@ -266,7 +266,7 @@ export const getMcpConfig = (
       // No headers flag, the key travels inside the URL like remote clients
       return {
         config: `ncl groups config add-mcp-server --id <group-id> --name postiz --url ${mcpBase}/mcp/${apiKey}`,
-        hint: 'Run this in your terminal, replace <group-id> with the agent group that should get Kitepost.',
+        hint: 'Run this in your terminal, replace <group-id> with the agent group that should get Castkite.',
       };
   }
 };
@@ -315,7 +315,7 @@ const McpSection = ({
 }) => {
   const t = useT();
   const [activeClient, setActiveClient] = useState<AnyMcpClient>('Claude');
-  // the directory connectors install Postiz's own listing, not Kitepost's
+  // the directory connectors install Postiz's own listing, not Castkite's
   const officialConnectors = false;
   // the directory connectors come first wherever they work
   const tabs: Array<'official' | McpAuth> = officialConnectors
@@ -354,7 +354,7 @@ const McpSection = ({
           <div className="text-[13px] text-customColor18 mt-[2px]">
             {t(
               'connect_your_mcp_client_to_postiz_to_schedule_your_posts_faster',
-              'Connect Kitepost MCP server to your client (Http streaming) to schedule your posts faster.'
+              'Connect Castkite MCP server to your client (Http streaming) to schedule your posts faster.'
             )}
           </div>
         </div>
@@ -403,7 +403,7 @@ const McpSection = ({
                   {m === 'official'
                     ? t('official_connector', 'Official connector')
                     : m === 'oauth'
-                    ? t('sign_in_no_api_key', 'Sign in with Kitepost (no API key)')
+                    ? t('sign_in_no_api_key', 'Sign in with Castkite (no API key)')
                     : t('api_key', 'API Key')}
                 </button>
               ))}
@@ -416,12 +416,12 @@ const McpSection = ({
               {isSelfHosted
                 ? t(
                     'connector_self_hosted_description',
-                    'The official connector works with self-hosted Kitepost too. When asked to sign in, choose "Use self-hosted" and enter {{url}} with your API key.',
+                    'The official connector works with self-hosted Castkite too. When asked to sign in, choose "Use self-hosted" and enter {{url}} with your API key.',
                     { url: mcpBase, interpolation: { escapeValue: false } }
                   )
                 : t(
                     'connector_onboarding_description',
-                    'The fastest way: add Kitepost with one click, you will be asked to sign in'
+                    'The fastest way: add Castkite with one click, you will be asked to sign in'
                   )}
             </div>
             <div className="flex flex-wrap gap-[8px]">
@@ -481,7 +481,7 @@ const McpSection = ({
               !chatOnly &&
               ` ${t(
                 'oauth_sign_in_hint',
-                'Your agent will open a browser window to sign in to Kitepost.'
+                'Your agent will open a browser window to sign in to Castkite.'
               )}`}
           </div>
           <pre className="bg-newBgColorInner border border-newBorder rounded-[8px] p-[16px] text-[13px] whitespace-pre-wrap break-all overflow-x-auto leading-[1.6]">
@@ -609,7 +609,7 @@ const PublicApiContent = () => {
         <br />
         {t(
           'api_auth_note_line2',
-          'If you are building a product that schedules posts on behalf of other Kitepost users,'
+          'If you are building a product that schedules posts on behalf of other Castkite users,'
         )}
         <br />
         {t(
@@ -631,7 +631,7 @@ const PublicApiContent = () => {
             <div className="text-[13px] text-customColor18 mt-[2px]">
               {t(
                 'use_postiz_api_to_integrate_with_your_tools',
-                'Use Kitepost API to integrate with your tools.'
+                'Use Castkite API to integrate with your tools.'
               )}
             </div>
           </div>

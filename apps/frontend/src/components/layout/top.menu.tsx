@@ -183,7 +183,7 @@ export const useMenuItem = () => {
       path: 'https://affiliate.postiz.com',
       role: ['ADMIN', 'SUPERADMIN', 'USER'],
       requireBilling: true,
-      // upstream Postiz affiliate program; hidden until Kitepost has its own
+      // upstream Postiz affiliate program; hidden until Castkite has its own
       hide: true,
     },
     {

@@ -9,7 +9,7 @@ export const LogoTextComponent = () => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label="Kitepost"
+      aria-label="Castkite"
     >
       <rect x="3" y="3" width="129" height="30" fill="#000000" />
       <rect x="1" y="1" width="127" height="28" fill="#FFD400" stroke="#000000" strokeWidth="2" />
@@ -23,7 +23,7 @@ export const LogoTextComponent = () => {
         fontWeight="700"
         letterSpacing="0.5"
       >
-        KITEPOST
+        CASTKITE
       </text>
     </svg>
   );

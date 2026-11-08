@@ -2,7 +2,7 @@ import { MediaLayoutComponent } from '@gitroom/frontend/components/new-layout/la
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: `Kitepost Media`,
+  title: `Castkite Media`,
   description: '',
 };
 

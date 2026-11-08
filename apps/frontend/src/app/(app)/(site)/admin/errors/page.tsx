@@ -3,7 +3,7 @@ import { AdminErrorsComponent } from '@gitroom/frontend/components/admin/admin-e
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: `Kitepost Admin Errors`,
+  title: `Castkite Admin Errors`,
   description: '',
 };
 
