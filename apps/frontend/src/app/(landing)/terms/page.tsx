@@ -1,10 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  Fill,
-  LegalPage,
-  LegalSection,
-} from '@gitroom/frontend/components/landing/legal.page';
+import { LegalPage, LegalSection } from '@gitroom/frontend/components/landing/legal.page';
 
 export const metadata: Metadata = {
   title: 'Terms of Service · Castkite',
@@ -16,8 +12,9 @@ export default function TermsPage() {
   return (
     <LegalPage title="Terms of Service" updated="November 8, 2026">
       <p className="text-[17px] leading-[1.65]">
-        These terms are an agreement between you and <Fill>COMPANY LEGAL NAME</Fill>{' '}
-        (&quot;Castkite&quot;, &quot;we&quot;, &quot;us&quot;) about your use of the hosted
+        These terms are an agreement between you and Anmol Sethi, an individual
+        developer based in Ludhiana, Punjab, India, who runs Castkite
+        (&quot;Castkite&quot;, &quot;we&quot;, &quot;us&quot;), about your use of the hosted
         Castkite service. By creating an account or using the service you accept
         them. If you use Castkite for an organization, you accept them on its
         behalf and confirm you are allowed to.
@@ -26,7 +23,7 @@ export default function TermsPage() {
       <LegalSection title="1. Your account">
         <p>
           You must give accurate sign-up details, keep your login secure and be at
-          least 16 years old. You are responsible for everything done through your
+          least 18 years old. You are responsible for everything done through your
           account, including by team members you invite.
         </p>
       </LegalSection>
@@ -130,9 +127,12 @@ export default function TermsPage() {
 
       <LegalSection title="12. Law and contact">
         <p>
-          These terms are governed by the laws of <Fill>COUNTRY / STATE</Fill>.
-          Questions about them: <Fill>CONTACT EMAIL</Fill>,{' '}
-          <Fill>POSTAL ADDRESS</Fill>.
+          These terms are governed by the laws of India, and the courts at
+          Ludhiana, Punjab have exclusive jurisdiction. Questions about these
+          terms: <a href="mailto:anmol@castkite.com">anmol@castkite.com</a>.
+          Help with your account:{' '}
+          <a href="mailto:support@castkite.com">support@castkite.com</a>.
+          Postal address: Ludhiana, Punjab, India.
         </p>
       </LegalSection>
     </LegalPage>

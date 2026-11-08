@@ -1,11 +1,5 @@
 import { ReactNode } from 'react';
 
-// Details only the owner can supply (legal name, address, contact):
-// highlighted so a missing one is obvious on the live page
-export const Fill = ({ children }: { children: ReactNode }) => (
-  <mark className="bg-brand px-[4px] font-mono text-[0.9em]">[{children}]</mark>
-);
-
 export const LegalSection = ({
   title,
   children,

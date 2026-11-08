@@ -1,10 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  Fill,
-  LegalPage,
-  LegalSection,
-} from '@gitroom/frontend/components/landing/legal.page';
+import { LegalPage, LegalSection } from '@gitroom/frontend/components/landing/legal.page';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy · Castkite',
@@ -17,9 +13,9 @@ export default function PrivacyPage() {
   return (
     <LegalPage title="Privacy Policy" updated="November 8, 2026">
       <p className="text-[17px] leading-[1.65]">
-        This policy explains how <Fill>COMPANY LEGAL NAME</Fill> (&quot;Castkite&quot;,
-        &quot;we&quot;) handles personal data in the hosted Castkite service. We are
-        the data controller for your account data. For content you publish
+        This policy explains how Anmol Sethi, the individual developer who runs
+        Castkite (&quot;Castkite&quot;, &quot;we&quot;), handles personal data in the hosted Castkite service. We are
+        the data fiduciary (data controller) for your account data. For content you publish
         through Castkite, we process it on your instructions.
       </p>
 
@@ -77,8 +73,8 @@ export default function PrivacyPage() {
         <p>
           Some of them are outside your country, including in the United States.
           Where required, transfers are covered by standard contractual clauses
-          or an equivalent safeguard. A full list of our processors:{' '}
-          <Fill>LINK OR CONTACT EMAIL</Fill>.
+          or an equivalent safeguard. For the full list of our processors, write to{' '}
+          <a href="mailto:anmol@castkite.com">anmol@castkite.com</a>.
         </p>
       </LegalSection>
 
@@ -93,11 +89,11 @@ export default function PrivacyPage() {
       <LegalSection title="How long we keep it">
         <p>
           We keep your data while your account is open. When you delete your
-          account from your settings, it and its content are removed from the
-          service, and the deleted records are purged within{' '}
-          <Fill>PURGE PERIOD</Fill>, except what we must keep for legal or tax
-          reasons.
-          Backups are overwritten within <Fill>BACKUP RETENTION, E.G. 30 DAYS</Fill>.
+          account from your settings, your name, email, password and sign-in
+          details are anonymized immediately. Your workspace content (posts,
+          media, connected channels) is removed from the service right away and
+          permanently erased within 30 days, except what we must keep for legal
+          or tax reasons. Backups are overwritten within 30 days.
         </p>
       </LegalSection>
 
@@ -106,8 +102,10 @@ export default function PrivacyPage() {
           Depending on where you live, you can ask to access, correct, export or
           delete your data, object to or restrict how we use it, and withdraw
           consent. Most of this you can do in the app; for the rest, write to{' '}
-          <Fill>CONTACT EMAIL</Fill>. You can also complain to your local data
-          protection authority.
+          <a href="mailto:anmol@castkite.com">anmol@castkite.com</a>. You can
+          also nominate someone to exercise these rights for you, and complain
+          to the Data Protection Board of India or your local data protection
+          authority.
         </p>
       </LegalSection>
 
@@ -121,14 +119,23 @@ export default function PrivacyPage() {
       </LegalSection>
 
       <LegalSection title="Children">
-        <p>Castkite is not for anyone under 16, and we do not knowingly collect their data.</p>
+        <p>Castkite is not for anyone under 18, and we do not knowingly collect their data.</p>
+      </LegalSection>
+
+      <LegalSection title="Grievance Officer">
+        <p>
+          Under the Information Technology Act, 2000 and the Digital Personal Data
+          Protection Act, 2023, our Grievance Officer is Anmol Sethi, reachable at{' '}
+          <a href="mailto:anmol@castkite.com">anmol@castkite.com</a>. We
+          acknowledge complaints within 24 hours and resolve them within 15 days.
+        </p>
       </LegalSection>
 
       <LegalSection title="Changes and contact">
         <p>
           We will announce meaningful changes to this policy by email or in the
-          app. Questions: <Fill>CONTACT EMAIL</Fill>, <Fill>POSTAL ADDRESS</Fill>.
-          See also our <Link href="/terms">Terms of Service</Link>.
+          app. Questions: <a href="mailto:anmol@castkite.com">anmol@castkite.com</a>.
+          Postal address: Ludhiana, Punjab, India. See also our <Link href="/terms">Terms of Service</Link>.
         </p>
       </LegalSection>
     </LegalPage>
