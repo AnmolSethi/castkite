@@ -1,5 +1,5 @@
 import { CreateOrgUserDto } from '@gitroom/nestjs-libraries/dtos/auth/create.org.user.dto';
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { OrganizationRepository } from '@gitroom/nestjs-libraries/database/prisma/organizations/organization.repository';
 import { NotificationService } from '@gitroom/nestjs-libraries/database/prisma/notifications/notification.service';
 import { AddTeamMemberDto } from '@gitroom/nestjs-libraries/dtos/settings/add.team.member.dto';
@@ -10,9 +10,12 @@ import dayjs from 'dayjs';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 import { Organization, ShortLinkPreference, User } from '@prisma/client';
 import { AutopostService } from '@gitroom/nestjs-libraries/database/prisma/autopost/autopost.service';
+import { UploadFactory } from '@gitroom/nestjs-libraries/upload/upload.factory';
 
 @Injectable()
 export class OrganizationService {
+  private readonly _logger = new Logger(OrganizationService.name);
+  private storage = UploadFactory.createStorage();
   constructor(
     private _organizationRepository: OrganizationRepository,
     private _notificationsService: NotificationService
@@ -229,5 +232,58 @@ export class OrganizationService {
       orgId,
       requireApproval
     );
+  }
+
+  // The privacy policy promises workspace content is erased within 30 days of
+  // deletion. Safe to re-run: purged organizations are never picked again
+  async purgeDeletedOrganizations() {
+    const deletedBefore = dayjs().subtract(30, 'day').toDate();
+    let purged = 0;
+    let failed = 0;
+
+    while (true) {
+      // failed ones stay unpurged, skip them so they don't block the rest
+      const batch = await this._organizationRepository.getOrganizationsToPurge(
+        deletedBefore,
+        10,
+        failed
+      );
+      if (!batch.length) {
+        break;
+      }
+
+      for (const { id } of batch) {
+        // files go first: if the database purge fails they are retried
+        // tomorrow, and a missing file is only logged
+        for (const path of await this._organizationRepository.getOrganizationFiles(
+          id
+        )) {
+          try {
+            if (
+              await this._organizationRepository.isFileUsedElsewhere(id, path)
+            ) {
+              this._logger.warn(`Kept file ${path} of ${id}, used elsewhere`);
+              continue;
+            }
+            await this.storage.removeFile(path);
+          } catch (err) {
+            this._logger.error(`Could not remove file ${path} of ${id}`, err);
+          }
+        }
+
+        try {
+          await this._organizationRepository.purgeOrganization(id);
+          purged++;
+        } catch (err) {
+          failed++;
+          this._logger.error(`Could not purge organization ${id}`, err);
+        }
+      }
+    }
+
+    this._logger.log(
+      `Purged ${purged} deleted organizations, ${failed} failed`
+    );
+    return { purged, failed };
   }
 }
