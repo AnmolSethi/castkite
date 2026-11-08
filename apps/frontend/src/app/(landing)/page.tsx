@@ -6,7 +6,7 @@ import { LandingPage } from '@gitroom/frontend/components/landing/landing.page';
 export const dynamic = 'force-dynamic';
 
 const description =
-  'Schedule posts to X, LinkedIn, Instagram, TikTok and 24 more channels, with approvals, bulk CSV import, best-time suggestions and a caption library. Open source.';
+  'Schedule posts to X, LinkedIn, Instagram, TikTok and 24 more channels, with approvals, bulk CSV import, best-time suggestions and a caption library.';
 
 export const metadata: Metadata = {
   title: 'Castkite · Social media scheduling for busy teams',

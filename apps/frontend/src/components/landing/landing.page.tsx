@@ -2,10 +2,7 @@ import { ReactNode } from 'react';
 import Link from 'next/link';
 import { getT } from '@gitroom/react/translation/get.translation.service.backend';
 import { pricing } from '@gitroom/nestjs-libraries/database/prisma/subscriptions/pricing';
-import {
-  landingButton,
-  SOURCE_URL,
-} from '@gitroom/frontend/components/landing/landing.shell';
+import { landingButton } from '@gitroom/frontend/components/landing/landing.shell';
 
 type T = Awaited<ReturnType<typeof getT>>;
 
@@ -248,13 +245,6 @@ export const LandingPage = async () => {
         'Yes. You cancel from your settings in two clicks, without talking to anyone.'
       ),
     ],
-    [
-      t('faq_can_i_trust_postiz_gitroom', 'Can I trust Castkite?'),
-      t(
-        'faq_postiz_gitroom_is_proudly_open_source',
-        'Castkite is proudly open-source!'
-      ),
-    ],
   ];
 
   return (
@@ -263,7 +253,7 @@ export const LandingPage = async () => {
         <div className={`${container} grid lg:grid-cols-12 gap-[48px] py-[56px] md:py-[96px] items-center`}>
           <div className="lg:col-span-7 flex flex-col gap-[28px]">
             <p className={eyebrow}>
-              {t('landing_hero_eyebrow', 'Social media scheduling · Open source')}
+              {t('landing_hero_eyebrow', 'Social media scheduling')}
             </p>
             <h1 className="text-[48px] sm:text-[64px] lg:text-[84px] font-[700] leading-[0.95] tracking-[-0.045em]">
               {t('landing_hero_title_1', 'Write it once.')}{' '}
@@ -433,28 +423,6 @@ export const LandingPage = async () => {
               );
             })}
           </ul>
-        </div>
-      </section>
-
-      <section aria-labelledby="open-title" className="border-b-2 border-black bg-black text-white">
-        <div className={`${container} py-[72px] md:py-[96px] grid lg:grid-cols-12 gap-[32px] items-end`}>
-          <h2 id="open-title" className={`${sectionTitle} lg:col-span-8 text-brand`}>
-            {t('landing_open_title', 'The code is public. Read it, run it, fork it.')}
-          </h2>
-          <div className="lg:col-span-4 flex flex-col gap-[20px]">
-            <p className="text-[17px] leading-[1.55]">
-              {t(
-                'landing_open_text',
-                'Castkite is open source under the AGPL-3.0. Use our hosted version, or run it on your own servers.'
-              )}
-            </p>
-            <a
-              href={SOURCE_URL}
-              className="text-[16px] font-[700] underline underline-offset-[6px] decoration-2 text-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[4px] focus-visible:outline-brand"
-            >
-              {t('landing_open_link', 'View the source on GitHub')}
-            </a>
-          </div>
         </div>
       </section>
 

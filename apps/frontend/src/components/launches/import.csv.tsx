@@ -96,6 +96,7 @@ const ImportCsvModal: FC<{
   const t = useT();
   const fetch = useFetch();
   const toaster = useToaster();
+  const modal = useModals();
   const [rows, setRows] = useState<ImportRow[]>([]);
   const [fileError, setFileError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -153,19 +154,33 @@ const ImportCsvModal: FC<{
       return;
     }
 
-    const results: { row: number; ok: boolean; error?: string }[] =
-      await res.json();
+    const results: {
+      row: number;
+      ok: boolean;
+      error?: string;
+      pendingApproval?: boolean;
+    }[] = await res.json();
     const failed = new Map(
       results.filter((r) => !r.ok).map((r) => [ready[r.row - 1].line, r.error])
     );
     const created = results.length - failed.size;
+    // members' posts wait for an admin instead of being scheduled
+    const pending = results.some((r) => r.pendingApproval);
     onDone();
 
     if (!failed.size) {
       toaster.show(
-        t('csv_import_done', '{{count}} posts scheduled', { count: created }),
+        pending
+          ? t('csv_import_pending', '{{count}} posts sent for approval', {
+              count: created,
+            })
+          : t('csv_import_done', '{{count}} posts scheduled', {
+              count: created,
+            }),
         'success'
       );
+      // close so the same rows cannot be submitted twice
+      modal.closeCurrent();
       return;
     }
 
@@ -178,12 +193,18 @@ const ImportCsvModal: FC<{
         .sort((a, b) => a.line - b.line)
     );
     toaster.show(
-      t('csv_import_partial', '{{count}} posts scheduled, some rows failed', {
-        count: created,
-      }),
+      pending
+        ? t(
+            'csv_import_pending_partial',
+            '{{count}} posts sent for approval, some rows failed',
+            { count: created }
+          )
+        : t('csv_import_partial', '{{count}} posts scheduled, some rows failed', {
+            count: created,
+          }),
       'warning'
     );
-  }, [ready, rows, fetch, toaster, t, onDone]);
+  }, [ready, rows, fetch, toaster, t, onDone, modal]);
 
   return (
     <div className="flex flex-col gap-[16px] text-textColor">

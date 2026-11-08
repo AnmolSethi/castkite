@@ -1457,7 +1457,12 @@ export class PostsService {
     rows: ImportPostRow[],
     pendingApproval: boolean
   ) {
-    const results: { row: number; ok: boolean; error?: string }[] = [];
+    const results: {
+      row: number;
+      ok: boolean;
+      error?: string;
+      pendingApproval?: boolean;
+    }[] = [];
     for (const [index, row] of rows.entries()) {
       const post = {
         integration: { id: row.integrationId },
@@ -1493,7 +1498,7 @@ export class PostsService {
           orgId
         );
         await this.createPost(orgId, body, 'WEB', false, pendingApproval);
-        results.push({ row: index + 1, ok: true });
+        results.push({ row: index + 1, ok: true, pendingApproval });
       } catch (err: any) {
         results.push({
           row: index + 1,
