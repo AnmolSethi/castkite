@@ -21,8 +21,8 @@ export interface SelfHostedInstance {
   apiKey: string;
 }
 
-// Every Postiz MCP server since v2.19.0 (the first one with the API key /mcp
-// route) has these; a server without them is not a Postiz instance
+// Every Castkite MCP server (like upstream Postiz since v2.19.0, the first one with the API key /mcp
+// route) has these; a server without them is not a Castkite instance
 const requiredTools = ['integrationList', 'integrationSchedulePostTool'];
 
 // Tool results are small JSON, an instance never needs this server to hold
@@ -70,7 +70,7 @@ const instanceFetch = async (url: string | URL, init?: RequestInit) => {
   });
 };
 
-// Postiz Cloud relays the MCP connection of a self-hosted Postiz: the person
+// Castkite Cloud relays the MCP connection of a self-hosted Castkite: the person
 // brings the instance and its API key on the consent screen ("Use
 // self-hosted"), and the tool calls of that connection run on the instance
 @Injectable()
@@ -94,7 +94,7 @@ export class McpRelayService {
       );
     } catch {
       throw new HttpException(
-        'Enter the address of your Castkite instance, for example https://postiz.example.com',
+        'Enter the address of your Castkite instance, for example https://castkite.example.com',
         HttpStatus.BAD_REQUEST
       );
     }
@@ -103,7 +103,7 @@ export class McpRelayService {
     // user "me" on company.com) is never sent anywhere
     if (url.username || url.password) {
       throw new HttpException(
-        'Enter the address of your Castkite instance, for example https://postiz.example.com',
+        'Enter the address of your Castkite instance, for example https://castkite.example.com',
         HttpStatus.BAD_REQUEST
       );
     }
@@ -245,7 +245,7 @@ export class McpRelayService {
               }
             }
 
-            // an instance on another Postiz version can answer in another shape
+            // an instance on another Castkite version can answer in another shape
             const check = await tool.outputSchema['~standard']?.validate(output);
             if (check?.issues) {
               return this.failure(

@@ -1,4 +1,4 @@
-// Contract of the ingest and clip jobs of the media service (postiz-uploader
+// Contract of the ingest and clip jobs of the media service (media uploader
 // schema/v1, README 4.4 and 4.5). Same envelope and failure block as the
 // normalization jobs: URLs in, metadata out.
 export interface ProcessorFailure {

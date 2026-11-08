@@ -619,7 +619,7 @@ export class TiktokBusinessProvider
   }
 
   // autoAddMusic picks a random commercial-library track instead of TikTok's
-  // auto_add_music flag, so the attached music is chosen by Postiz rather than
+  // auto_add_music flag, so the attached music is chosen by Castkite rather than
   // silently by TikTok. Returns undefined when the trending list is empty or
   // unavailable - the photo body then falls back to auto_add_music.
   private async pickRandomMusicId(

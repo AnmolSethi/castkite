@@ -63,7 +63,7 @@ export const startMcp = async (app: INestApplication) => {
     return organizationService.getOrgByApiKey(token);
   };
 
-  // psh_ tokens: a self-hosted Postiz this server relays to (McpRelayService)
+  // psh_ tokens: a self-hosted Castkite this server relays to (McpRelayService)
   const resolveSelfHosted = (token: string) =>
     oauthService.getSelfHostedByAccessToken(token);
 
@@ -150,7 +150,7 @@ export const startMcp = async (app: INestApplication) => {
   const server = new MCPServer({ ...serverConfig, protocolVersion: '2026-07-28' });
 
   // The directory-facing servers don't register the agent - it would be
-  // exposed as an annotation-less catch-all ask_postiz tool, which the
+  // exposed as an annotation-less catch-all ask_postiz tool (named after the agent id), which the
   // ChatGPT and Claude directory reviews reject
   const oauthServer = new MCPServer({
     name: 'Castkite MCP',
