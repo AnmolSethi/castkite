@@ -1,10 +1,12 @@
 import { FC, useCallback } from 'react';
 import { SignaturesComponent } from '@gitroom/frontend/components/settings/signatures.component';
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
+import { useT } from '@gitroom/react/translation/get.transation.service.client';
 export const SignatureBox: FC<{
   editor: any;
 }> = ({ editor }) => {
   const modals = useModals();
+  const t = useT();
   const appendValue = (val: string) => {
     editor?.commands?.insertContent('\n\n' + val);
     editor?.commands?.focus();
@@ -12,20 +14,22 @@ export const SignatureBox: FC<{
 
   const addSignature = useCallback(() => {
     modals.openModal({
-      title: 'Add Signature',
+      title: t('caption_library', 'Caption & hashtag library'),
       withCloseButton: true,
       children: (close) => (
         <SignatureModal appendSignature={appendValue} close={close} />
       ),
     });
-  }, [appendValue]);
+  }, [appendValue, t]);
 
   return (
     <>
-      <div
+      <button
+        type="button"
         onClick={addSignature}
+        aria-label={t('insert_from_library', 'Insert from library')}
         data-tooltip-id="tooltip"
-        data-tooltip-content="Add Signature"
+        data-tooltip-content={t('insert_from_library', 'Insert from library')}
         className="select-none cursor-pointer rounded-[6px] mobile:rounded-[8px] w-[30px] h-[30px] mobile:w-[40px] mobile:h-[40px] bg-newColColor mobile:bg-newSettings flex justify-center items-center"
       >
         <svg
@@ -56,7 +60,7 @@ export const SignatureBox: FC<{
             </clipPath>
           </defs>
         </svg>
-      </div>
+      </button>
     </>
   );
 };

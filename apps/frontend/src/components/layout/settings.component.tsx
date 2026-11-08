@@ -104,7 +104,7 @@ export const SettingsPopup: FC<{
       arr.push({ tab: 'sets', label: t('sets', 'Sets') });
     }
     if (user?.tier.current !== 'FREE') {
-      arr.push({ tab: 'signatures', label: t('signatures', 'Signatures') });
+      arr.push({ tab: 'signatures', label: t('caption_library', 'Caption & hashtag library') });
     }
     arr.push({ tab: 'integrations', label: t('integrations', 'Integrations') });
     arr.push({ tab: 'plugs', label: t('plugs', 'Plugs') });

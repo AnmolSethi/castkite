@@ -1,5 +1,6 @@
 'use client';
 
+import { useSWRConfig } from 'swr';
 import React, {
   FC,
   ReactNode,
@@ -78,6 +79,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
   const existingData = useExistingData();
   const [loading, setLoading] = useState(false);
   const toaster = useToaster();
+  const { mutate: globalMutate } = useSWRConfig();
   const modal = useModals();
   const [showSettings, setShowSettings] = useState(false);
   const [mobileTab, setMobileTab] = useState<'edit' | 'preview'>('edit');
@@ -791,6 +793,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
 
         if (!addEditSets) {
           mutate();
+          globalMutate('pending-approvals');
           toaster.show(
             !existingData.integration
               ? t('added_successfully', 'Added successfully')
@@ -1046,7 +1049,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                     <div
                       onClick={() => setShowSettings(!showSettings)}
                       className={clsx(
-                        'bg-[#612BD3] rounded-[12px] flex items-center gap-[8px] cursor-pointer p-[12px] mobile:hidden',
+                        'bg-brand rounded-[12px] flex items-center gap-[8px] cursor-pointer p-[12px] mobile:hidden',
                         showSettings ? '!rounded-b-none' : ''
                       )}
                     >
@@ -1161,7 +1164,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
             )}
             {addEditSets && (
               <button
-                className="text-white text-[15px] font-[600] min-w-[180px] btnSub disabled:cursor-not-allowed disabled:opacity-80 outline-none gap-[8px] flex justify-center items-center h-[44px] rounded-[8px] bg-[#612BD3] ps-[20px] pe-[16px]"
+                className="text-black text-[15px] font-[600] min-w-[180px] btnSub disabled:cursor-not-allowed disabled:opacity-80 outline-none gap-[8px] flex justify-center items-center h-[44px] rounded-[8px] bg-brand ps-[20px] pe-[16px]"
                 disabled={
                   selectedIntegrations.length === 0 || loading || locked
                 }
@@ -1177,7 +1180,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                     selectedIntegrations.length === 0 || loading || locked
                   }
                   onClick={schedule('schedule')}
-                  className="text-white relative min-w-[180px] btnSub disabled:cursor-not-allowed disabled:opacity-80 outline-none gap-[8px] flex justify-center items-center h-[44px] rounded-[8px] bg-[#612BD3] ps-[20px] pe-[16px]"
+                  className="text-black relative min-w-[180px] btnSub disabled:cursor-not-allowed disabled:opacity-80 outline-none gap-[8px] flex justify-center items-center h-[44px] rounded-[8px] bg-brand ps-[20px] pe-[16px]"
                 >
                   {loading && (
                     <div className="absolute left-[50%] top-[50%] -translate-y-[50%] -translate-x-[50%]">

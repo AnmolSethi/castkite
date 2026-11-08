@@ -6,6 +6,8 @@ import dynamic from 'next/dynamic';
 import AuthenticationComponent from '@gitroom/frontend/components/settings/authentication.component';
 import EmailNotificationsComponent from '@gitroom/frontend/components/settings/email-notifications.component';
 import ShortlinkPreferenceComponent from '@gitroom/frontend/components/settings/shortlink-preference.component';
+import ApprovalPreferenceComponent from '@gitroom/frontend/components/settings/approval-preference.component';
+import { useUser } from '@gitroom/frontend/components/layout/user.context';
 import DeleteAccountComponent from '@gitroom/frontend/components/settings/delete-account.component';
 
 const MetricComponent = dynamic(
@@ -17,6 +19,7 @@ const MetricComponent = dynamic(
 
 export const GlobalSettings = () => {
   const t = useT();
+  const user = useUser();
   return (
     <div className="flex flex-col">
       <h3 className="text-[20px]">{t('global_settings', 'Global Settings')}</h3>
@@ -24,6 +27,7 @@ export const GlobalSettings = () => {
       <MetricComponent />
       <EmailNotificationsComponent />
       <ShortlinkPreferenceComponent />
+      {user?.role !== 'USER' && <ApprovalPreferenceComponent />}
       <DeleteAccountComponent />
     </div>
   );

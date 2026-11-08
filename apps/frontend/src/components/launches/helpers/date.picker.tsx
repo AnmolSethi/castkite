@@ -246,7 +246,7 @@ export const DatePickerPanel: FC<{
             return '!text-gray';
           }
           if (modifiers.selected) {
-            return '!text-white !bg-seventh !outline-none';
+            return '!text-black !bg-seventh !outline-none';
           }
           return '!text-textColor';
         }}

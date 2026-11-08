@@ -219,4 +219,15 @@ export class OrganizationService {
       shortlink
     );
   }
+
+  getApprovalPreference(orgId: string) {
+    return this._organizationRepository.getApprovalPreference(orgId);
+  }
+
+  updateApprovalPreference(orgId: string, requireApproval: boolean) {
+    return this._organizationRepository.updateApprovalPreference(
+      orgId,
+      requireApproval
+    );
+  }
 }

@@ -520,6 +520,71 @@ export class PostsRepository {
     });
   }
 
+  setPendingApproval(orgId: string, id: string, pendingApproval: boolean) {
+    return this._post.model.post.update({
+      where: {
+        id,
+        organizationId: orgId,
+      },
+      data: {
+        pendingApproval,
+      },
+      select: {
+        id: true,
+      },
+    });
+  }
+
+  getRecentPublished(orgId: string, integrationId: string, since: Date) {
+    return this._post.model.post.findMany({
+      where: {
+        organizationId: orgId,
+        integrationId,
+        state: 'PUBLISHED',
+        deletedAt: null,
+        parentPostId: null,
+        releaseId: { not: null },
+        publishDate: { gte: since },
+      },
+      orderBy: {
+        publishDate: 'desc',
+      },
+      take: 20,
+      select: {
+        id: true,
+        publishDate: true,
+      },
+    });
+  }
+
+  getPendingApprovals(orgId: string) {
+    return this._post.model.post.findMany({
+      where: {
+        organizationId: orgId,
+        pendingApproval: true,
+        deletedAt: null,
+        parentPostId: null,
+      },
+      orderBy: {
+        publishDate: 'asc',
+      },
+      select: {
+        id: true,
+        group: true,
+        content: true,
+        publishDate: true,
+        integration: {
+          select: {
+            id: true,
+            name: true,
+            picture: true,
+            providerIdentifier: true,
+          },
+        },
+      },
+    });
+  }
+
   async changeState(id: string, state: State, err?: any, body?: any) {
     const update = await this._post.model.post.update({
       where: {

@@ -26,6 +26,7 @@ export class SignatureRepository {
   ) {
     const values = {
       organizationId: orgId,
+      name: signature.name?.trim() || null,
       content: signature.content,
       autoAdd: signature.autoAdd,
     };

@@ -21,6 +21,7 @@ model Organization {
   allowTrial          Boolean              @default(false)
   isTrailing          Boolean              @default(false)
   shortlink           ShortLinkPreference  @default(ASK)
+  requireApproval     Boolean              @default(false)
   autoPost            AutoPost[]
   Comments            Comments[]
   credits             Credits[]
@@ -414,6 +415,7 @@ model Integration {
 model Signatures {
   id             String       @id @default(uuid())
   organizationId String
+  name           String?
   content        String
   autoAdd        Boolean
   createdAt      DateTime     @default(now())
@@ -476,6 +478,7 @@ model Post {
   submittedForOrderId        String?
   submittedForOrganizationId String?
   approvedSubmitForOrder     APPROVED_SUBMIT_FOR_ORDER @default(NO)
+  pendingApproval            Boolean                   @default(false)
   creationMethod             CreationMethod            @default(UNKNOWN)
   lastMessageId              String?
   intervalInDays             Int?
@@ -507,6 +510,7 @@ model Post {
   @@index([submittedForOrderId])
   @@index([intervalInDays])
   @@index([approvedSubmitForOrder])
+  @@index([organizationId, pendingApproval])
   @@index([creationMethod])
   @@index([lastMessageId])
   @@index([createdAt])

@@ -710,4 +710,29 @@ export class OrganizationRepository {
       },
     });
   }
+
+  getApprovalPreference(orgId: string) {
+    return this._organization.model.organization.findUnique({
+      where: {
+        id: orgId,
+      },
+      select: {
+        requireApproval: true,
+      },
+    });
+  }
+
+  updateApprovalPreference(orgId: string, requireApproval: boolean) {
+    return this._organization.model.organization.update({
+      where: {
+        id: orgId,
+      },
+      data: {
+        requireApproval,
+      },
+      select: {
+        requireApproval: true,
+      },
+    });
+  }
 }

@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import useSWR from 'swr';
 import { Button } from '@gitroom/react/form/button';
@@ -10,6 +10,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CopilotTextarea } from '@copilotkit/react-textarea';
 import { Select } from '@gitroom/react/form/select';
+import { Input } from '@gitroom/react/form/input';
 import { useToaster } from '@gitroom/react/toaster/toaster';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import { deleteDialog } from '@gitroom/react/helpers/delete.dialog';
@@ -17,6 +18,7 @@ export const SignaturesComponent: FC<{
   appendSignature?: (value: string) => void;
 }> = (props) => {
   const { appendSignature } = props;
+  const t = useT();
   const fetch = useFetch();
   const modal = useModals();
   const toaster = useToaster();
@@ -24,10 +26,22 @@ export const SignaturesComponent: FC<{
     return (await fetch('/signatures')).json();
   }, []);
   const { data, mutate } = useSWR('signatures', load);
+  const [search, setSearch] = useState('');
+  const snippets = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return (data || []).filter(
+      (p: any) =>
+        !query ||
+        (p.name || '').toLowerCase().includes(query) ||
+        p.content.toLowerCase().includes(query)
+    );
+  }, [data, search]);
   const addSignature = useCallback(
     (data?: any) => () => {
       modal.openModal({
-        title: data ? 'Edit Signature' : 'Add Signature',
+        title: data
+          ? t('edit_snippet', 'Edit snippet')
+          : t('add_snippet', 'Add a snippet'),
         withCloseButton: true,
         children: <AddOrRemoveSignature data={data} reload={mutate} />,
       });
@@ -50,26 +64,43 @@ export const SignaturesComponent: FC<{
           method: 'DELETE',
         });
         mutate();
-        toaster.show('Signature deleted successfully', 'success');
+        toaster.show(t('snippet_deleted', 'Snippet deleted'), 'success');
       }
     },
     []
   );
 
-  const t = useT();
-
   return (
     <div className="flex flex-col">
-      <h3 className="text-[20px]">{t('signatures', 'Signatures')}</h3>
-      <div className="text-customColor18 mt-[4px]">
+      <h3 className="text-[20px]">
+        {t('caption_library', 'Caption & hashtag library')}
+      </h3>
+      <div className="text-textItemBlur mt-[4px]">
         {t(
-          'you_can_add_signatures_to_your_account_to_be_used_in_your_posts',
-          'You can add signatures to your account to be used in your posts.'
+          'caption_library_description',
+          'Save hashtag sets, captions and sign-offs once, then insert them into any post. One snippet can be added to every new post automatically.'
         )}
       </div>
+      {(data?.length || 0) > 3 && (
+        <label className="mt-[16px] flex flex-col gap-[6px] text-[14px]">
+          {t('search_snippets', 'Search snippets')}
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('search_snippets_placeholder', 'launch, #hiring...')}
+            className="h-[40px] px-[12px] rounded-[4px] border border-newBorder bg-newBgColorInner text-textColor outline-none focus:border-accentLine"
+          />
+        </label>
+      )}
       <div className="my-[16px] mt-[16px] bg-sixth border-fifth items-center border rounded-[4px] p-[24px] mobile:p-[12px] flex gap-[24px]">
         <div className="flex flex-col w-full">
-          {!!data?.length && (
+          {!!data?.length && !snippets.length && (
+            <div className="text-[14px] text-textItemBlur">
+              {t('no_snippets_match', 'No snippets match your search')}
+            </div>
+          )}
+          {!!snippets.length && (
             <div
               className={`grid ${
                 !!appendSignature
@@ -90,15 +121,27 @@ export const SignaturesComponent: FC<{
               <div className="text-center mobile:hidden">
                 {t('delete', 'Delete')}
               </div>
-              {data?.map((p: any) => (
+              {snippets.map((p: any) => (
                 // a row of the table, a card on phones
                 <div
                   key={p.id}
                   className="contents mobile:flex mobile:flex-wrap mobile:gap-[8px] mobile:p-[12px] mobile:rounded-[8px] mobile:border mobile:border-newColColor"
                 >
                   <div className="relative flex-1 me-[20px] overflow-x-hidden mobile:basis-full mobile:me-0">
-                    <div className="absolute start-0 line-clamp-1 top-[50%] -translate-y-[50%] text-ellipsis mobile:static mobile:translate-y-0">
-                      {p.content.slice(0, 15) + '...'}
+                    <div
+                      title={p.content}
+                      className="absolute start-0 line-clamp-1 top-[50%] -translate-y-[50%] text-ellipsis mobile:static mobile:translate-y-0"
+                    >
+                      {p.name ? (
+                        <>
+                          <span className="font-[600]">{p.name}</span>{' '}
+                          <span className="text-textItemBlur">
+                            {p.content.slice(0, 30)}
+                          </span>
+                        </>
+                      ) : (
+                        p.content.slice(0, 15) + '...'
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col justify-center relative me-[20px] mobile:basis-full mobile:me-0">
@@ -115,7 +158,7 @@ export const SignaturesComponent: FC<{
                         className="mobile:w-full mobile:px-[12px]"
                         onClick={() => appendSignature(p.content)}
                       >
-                        {t('use_signature', 'Use Signature')}
+                        {t('insert_snippet', 'Insert')}
                       </Button>
                     </div>
                   )}
@@ -151,7 +194,7 @@ export const SignaturesComponent: FC<{
                 'mobile:w-full'
               )}
             >
-              {t('add_a_signature', 'Add a signature')}
+              {t('add_snippet', 'Add a snippet')}
             </Button>
           </div>
         </div>
@@ -160,6 +203,7 @@ export const SignaturesComponent: FC<{
   );
 };
 const details = object().shape({
+  name: string().max(80),
   content: string().required(),
   autoAdd: boolean().required(),
 });
@@ -168,11 +212,13 @@ const AddOrRemoveSignature: FC<{
   reload: () => void;
 }> = (props) => {
   const { data, reload } = props;
+  const t = useT();
   const toast = useToaster();
   const fetch = useFetch();
   const form = useForm({
     resolver: yupResolver(details),
     values: {
+      name: data?.name || '',
       content: data?.content || '',
       autoAdd: data?.autoAdd || false,
     },
@@ -186,19 +232,12 @@ const AddOrRemoveSignature: FC<{
         method: data?.id ? 'PUT' : 'POST',
         body: JSON.stringify(values),
       });
-      toast.show(
-        data?.id
-          ? 'Signature updated successfully'
-          : 'Signature added successfully',
-        'success'
-      );
+      toast.show(t('snippet_saved', 'Snippet saved'), 'success');
       modal.closeCurrent();
       reload();
     },
     [data, modal]
   );
-
-  const t = useT();
 
   return (
     <FormProvider {...form}>
@@ -225,17 +264,27 @@ const AddOrRemoveSignature: FC<{
             </svg>
           </button>
 
+          <Input
+            label={t('snippet_name', 'Name (optional)')}
+            name="name"
+            maxLength={80}
+            placeholder={t('snippet_name_placeholder', 'e.g. Launch week hashtags')}
+          />
+
           <div className="relative bg-customColor2">
             <CopilotTextarea
               disableBranding={true}
               className={clsx(
-                '!min-h-40 !max-h-80 p-2 overflow-x-hidden scrollbar scrollbar-thumb-[#612AD5] bg-bigStrip outline-none'
+                '!min-h-40 !max-h-80 p-2 overflow-x-hidden scrollbar scrollbar-thumb-brand bg-bigStrip outline-none'
               )}
               value={text}
               onChange={(e) => {
                 form.setValue('content', e.target.value);
               }}
-              placeholder="Write your signature..."
+              placeholder={t(
+                'snippet_placeholder',
+                'Write hashtags, a caption or a sign-off...'
+              )}
               autosuggestionsConfig={{
                 textareaPurpose: `Assist me in writing social media signature`,
                 chatApiConfigs: {},

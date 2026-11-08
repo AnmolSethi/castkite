@@ -19,6 +19,7 @@ import {
   newDayjs,
 } from '@gitroom/frontend/components/layout/set.timezone';
 import clsx from 'clsx';
+import useSWR from 'swr';
 import {
   TrashIcon,
   PlusIcon,
@@ -35,6 +36,23 @@ const minutes = [...Array(60).keys()].map((i) => ({
   value: i,
 }));
 
+interface BestTimes {
+  analyzed: number;
+  slots: { time: number; posts: number; lift: number }[];
+}
+
+const useBestTimes = (integrationId: string) => {
+  const fetch = useFetch();
+  const load = useCallback(async () => {
+    return (await fetch(`/posts/best-times/${integrationId}`)).json();
+  }, [integrationId]);
+
+  return useSWR<BestTimes>(`best-times-${integrationId}`, load, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
+};
+
 export const TimeTable: FC<{
   integration: Integrations;
   mutate: () => void;
@@ -49,6 +67,9 @@ export const TimeTable: FC<{
   const [minute, setMinute] = useState(0);
   const fetch = useFetch();
   const modal = useModals();
+  const { data: bestTimes, isLoading: loadingBestTimes } = useBestTimes(
+    props.integration.id
+  );
   usePreventWindowUnload(true);
 
   const askClose = useCallback(async () => {
@@ -130,7 +151,7 @@ export const TimeTable: FC<{
       {/* Add Time Slot Section */}
       <div className="bg-newBgColorInner rounded-[12px] p-[20px] border border-newTableBorder">
         <div className="text-[15px] font-semibold mb-[16px] flex items-center gap-[8px]">
-          <DelayIcon size={18} className="text-[#612BD3]" />
+          <DelayIcon size={18} className="text-accentLine" />
           {t('add_time_slot', 'Add Time Slot')}
         </div>
 
@@ -170,12 +191,71 @@ export const TimeTable: FC<{
           <button
             type="button"
             onClick={addHour}
-            className="h-[42px] px-[16px] bg-[#612BD3] hover:bg-[#7640e0] transition-colors rounded-[8px] flex items-center gap-[6px] text-white text-[14px] font-medium"
+            className="h-[42px] px-[16px] bg-brand hover:bg-brand/85 transition-colors rounded-[8px] flex items-center gap-[6px] text-black text-[14px] font-medium"
           >
             <PlusIcon size={14} />
             {t('add', 'Add')}
           </button>
         </div>
+      </div>
+
+      {/* Suggested times from the channel's own results */}
+      <div className="mt-[20px] bg-newBgColorInner rounded-[12px] p-[20px] border border-newTableBorder">
+        <div className="text-[15px] font-semibold mb-[4px]">
+          {t('best_times_title', 'Best times to post')}
+        </div>
+        <div className="text-[12px] text-newTextColor/60 mb-[12px]">
+          {t(
+            'best_times_description',
+            'Based on how your recent posts on this channel performed.'
+          )}
+        </div>
+        {loadingBestTimes ? (
+          <div className="text-[14px] animate-pulse">
+            {t('best_times_loading', 'Analyzing your recent posts...')}
+          </div>
+        ) : !bestTimes?.slots?.length ? (
+          <div className="text-[14px] text-newTextColor/60">
+            {t(
+              'best_times_not_enough',
+              'Not enough results yet. Suggestions appear after a few published posts with analytics.'
+            )}
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-[8px]">
+            {bestTimes.slots.map((slot) => {
+              const added = currentTimes.some((c) => c.time === slot.time);
+              return (
+                <li
+                  key={slot.time}
+                  className="flex items-center justify-between gap-[12px] h-[48px] px-[16px] rounded-[8px] border border-newTableBorder"
+                >
+                  <span className="text-[15px] font-medium tabular-nums">
+                    {fromUtc(
+                      dayjs.utc().startOf('day').add(slot.time, 'minutes')
+                    ).format('HH:mm')}
+                  </span>
+                  <span className="flex-1 text-[12px] text-newTextColor/60">
+                    {t('best_times_lift', '{{lift}}x your average, {{posts}} posts', {
+                      lift: slot.lift,
+                      posts: slot.posts,
+                    })}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={added}
+                    onClick={() =>
+                      setCurrentTimes((prev) => [...prev, { time: slot.time }])
+                    }
+                    className="h-[32px] px-[12px] rounded-[6px] bg-brand text-black text-[13px] font-medium disabled:opacity-50 disabled:cursor-default"
+                  >
+                    {added ? t('added', 'Added') : t('add', 'Add')}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
       {/* Time Slots List */}
@@ -197,11 +277,11 @@ export const TimeTable: FC<{
                   'group flex items-center justify-between',
                   'h-[48px] px-[16px] rounded-[8px]',
                   'bg-newBgColorInner border border-newTableBorder',
-                  'hover:border-[#612BD3]/40 transition-colors'
+                  'hover:border-accentLine/40 transition-colors'
                 )}
               >
                 <div className="flex items-center gap-[12px]">
-                  <div className="w-[8px] h-[8px] rounded-full bg-[#612BD3]" />
+                  <div className="w-[8px] h-[8px] rounded-full bg-brand" />
                   <span className="text-[15px] font-medium tabular-nums">
                     {timeSlot.formatted}
                   </span>

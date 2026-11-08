@@ -74,6 +74,8 @@ module.exports = {
         customColor55: 'var(--color-custom55)',
         modalCustom: 'var(--color-modalCustom)',
 
+        brand: 'rgb(var(--brand) / <alpha-value>)',
+        accentLine: 'rgb(var(--accent-line) / <alpha-value>)',
         newBgColor: 'var(--new-bgColor)',
         newBackdrop: 'var(--new-back-drop)',
         newSep: 'var(--new-sep)',

@@ -2,7 +2,7 @@
 
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { Logo } from '@gitroom/frontend/components/new-layout/logo';
-import { jakartaSans } from '@gitroom/frontend/fonts/plus-jakarta-sans/plus.jakarta.sans.font';
+import { brandFont } from '@gitroom/frontend/fonts/space-grotesk/space.grotesk.font';
 const ModeComponent = dynamic(
   () => import('@gitroom/frontend/components/layout/mode.component'),
   {
@@ -102,7 +102,7 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
             <div
               className={clsx(
                 'flex flex-col min-h-screen min-w-screen text-newTextColor p-[12px] mobile:p-[8px] mobile:pb-[80px]',
-                jakartaSans.className
+                brandFont.className
               )}
             >
               <div>{user?.admin ? <Impersonate /> : <div />}</div>

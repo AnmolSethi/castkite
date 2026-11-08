@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PostsRepository } from '@gitroom/nestjs-libraries/database/prisma/posts/posts.repository';
 import { CreatePostDto } from '@gitroom/nestjs-libraries/dtos/posts/create.post.dto';
+import { ImportPostRow } from '@gitroom/nestjs-libraries/dtos/posts/import.posts.dto';
 import dayjs from 'dayjs';
 import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integration.manager';
 import {
@@ -62,6 +63,36 @@ import { countLength } from '@gitroom/helpers/utils/count.length';
 type PostWithConditionals = Post & {
   integration?: Integration;
   childrenPost: Post[];
+};
+
+// hours with at least two posts, ranked by average score against the overall average
+export const rankHours = (scored: { hour: number; score: number }[]) => {
+  if (scored.length < 5) {
+    return [];
+  }
+  const average = scored.reduce((sum, p) => sum + p.score, 0) / scored.length;
+  if (!average) {
+    return [];
+  }
+
+  const byHour = new Map<number, number[]>();
+  for (const { hour, score } of scored) {
+    byHour.set(hour, [...(byHour.get(hour) || []), score]);
+  }
+
+  return [...byHour.entries()]
+    .filter(([, scores]) => scores.length >= 2)
+    .map(([hour, scores]) => ({
+      time: hour * 60,
+      posts: scores.length,
+      lift:
+        Math.round(
+          (scores.reduce((a, b) => a + b, 0) / scores.length / average) * 10
+        ) / 10,
+    }))
+    .filter((slot) => slot.lift > 1)
+    .sort((a, b) => b.lift - a.lift)
+    .slice(0, 3);
 };
 
 @Injectable()
@@ -1149,10 +1180,13 @@ export class PostsService {
     orgId: string,
     body: CreatePostDto,
     creationMethod: CreationMethod,
-    keepGroup = false
+    keepGroup = false,
+    pendingApproval = false
   ): Promise<any[]> {
     const postList = [];
     const batchId = uuidv4();
+    // a post waiting for approval is stored as a draft so no workflow starts
+    const type = pendingApproval ? 'draft' : body.type;
     for (const post of body.posts) {
       if (
         (body.type === 'schedule' || body.type === 'now') &&
@@ -1185,7 +1219,7 @@ export class PostsService {
       }));
 
       const { posts } = await this._postRepository.createOrUpdatePost(
-        body.type,
+        type,
         orgId,
         body.type === 'now'
           ? dayjs().format('YYYY-MM-DDTHH:mm:00')
@@ -1207,7 +1241,18 @@ export class PostsService {
         posts.filter((p) => existingIds.includes(p.id))
       );
 
-      if (body.type !== 'update') {
+      if (
+        pendingApproval ||
+        (existingIds.length && (type === 'schedule' || type === 'now'))
+      ) {
+        await this._postRepository.setPendingApproval(
+          orgId,
+          posts[0].id,
+          pendingApproval
+        );
+      }
+
+      if (type !== 'update') {
         this.startWorkflow(
           post.settings.__type.split('-')[0].toLowerCase(),
           posts[0].id,
@@ -1404,6 +1449,115 @@ export class PostsService {
     } catch (err) {}
 
     return { id, state };
+  }
+
+  // each row is validated and created on its own, so one bad row never blocks the rest
+  async importPosts(
+    orgId: string,
+    rows: ImportPostRow[],
+    pendingApproval: boolean
+  ) {
+    const results: { row: number; ok: boolean; error?: string }[] = [];
+    for (const [index, row] of rows.entries()) {
+      const post = {
+        integration: { id: row.integrationId },
+        value: [{ content: row.content, image: [] as any[] }],
+        settings: {} as any,
+      };
+
+      try {
+        const [check] = await this.validatePosts(orgId, [post]);
+        const error = check.emptyContent
+          ? 'Content is empty'
+          : !check.valid
+          ? check.settingsError || 'This channel needs extra settings'
+          : check.errors !== true
+          ? check.errors
+          : check.tooLong
+          ? `Content is longer than ${check.maximumCharacters} characters`
+          : '';
+
+        if (error) {
+          results.push({ row: index + 1, ok: false, error });
+          continue;
+        }
+
+        const body = await this.mapTypeToPost(
+          {
+            type: 'schedule',
+            shortLink: false,
+            date: row.date,
+            tags: [],
+            posts: [post],
+          } as CreatePostDto,
+          orgId
+        );
+        await this.createPost(orgId, body, 'WEB', false, pendingApproval);
+        results.push({ row: index + 1, ok: true });
+      } catch (err: any) {
+        results.push({
+          row: index + 1,
+          ok: false,
+          error: err?.response?.message?.toString?.() || err?.message || 'Could not create post',
+        });
+      }
+    }
+
+    return results;
+  }
+
+  // ranks hours of the day (UTC) by how the channel's own recent posts performed
+  async getBestTimes(orgId: string, integrationId: string) {
+    const cacheKey = `best-times:${orgId}:${integrationId}`;
+    const cached = await ioRedis.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
+    const posts = await this._postRepository.getRecentPublished(
+      orgId,
+      integrationId,
+      dayjs().subtract(90, 'day').toDate()
+    );
+
+    const scored: { hour: number; score: number }[] = [];
+    // sequential on purpose: providers rate-limit analytics calls
+    for (const post of posts) {
+      const analytics = await this.checkPostAnalytics(orgId, post.id, 30);
+      if (!Array.isArray(analytics) || !analytics.length) {
+        continue;
+      }
+      // shortcut: providers mix lifetime totals and daily series, so each
+      // metric counts its highest value; good enough to compare one channel's posts
+      const score = analytics.reduce(
+        (sum, metric) =>
+          sum + Math.max(0, ...metric.data.map((d) => Number(d.total) || 0)),
+        0
+      );
+      scored.push({ hour: dayjs.utc(post.publishDate).hour(), score });
+    }
+
+    const result = { analyzed: scored.length, slots: rankHours(scored) };
+    await ioRedis.set(cacheKey, JSON.stringify(result), 'EX', 60 * 60 * 24);
+    return result;
+  }
+
+  getPendingApprovals(orgId: string) {
+    return this._postRepository.getPendingApprovals(orgId);
+  }
+
+  async decideApproval(orgId: string, id: string, approve: boolean) {
+    const post = await this._postRepository.getPostById(id, orgId);
+    if (!post || post.deletedAt || !post.pendingApproval) {
+      throw new BadRequestException('Post is not waiting for approval');
+    }
+
+    await this._postRepository.setPendingApproval(orgId, id, false);
+    if (!approve) {
+      return { id, state: post.state };
+    }
+
+    return this.changePostStatus(orgId, id, 'schedule');
   }
 
   async changeDate(

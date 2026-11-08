@@ -24,9 +24,13 @@ import { Response } from 'express';
 import { GetUserFromRequest } from '@gitroom/nestjs-libraries/user/user.from.request';
 import { ShortLinkService } from '@gitroom/nestjs-libraries/short-linking/short.link.service';
 import { CreateTagDto } from '@gitroom/nestjs-libraries/dtos/posts/create.tag.dto';
+import { ApprovalDecisionDto } from '@gitroom/nestjs-libraries/dtos/posts/approval.decision.dto';
+import { ImportPostsDto } from '@gitroom/nestjs-libraries/dtos/posts/import.posts.dto';
+import { PermissionsService } from '@gitroom/backend/services/auth/permissions/permissions.service';
 import {
   AuthorizationActions,
   Sections,
+  SubscriptionException,
 } from '@gitroom/backend/services/auth/permissions/permission.exception.class';
 import { PostValidationException } from '@gitroom/backend/api/routes/posts.validation.exception';
 import {
@@ -41,7 +45,8 @@ export class PostsController {
   constructor(
     private _postsService: PostsService,
     private _agentGraphService: AgentGraphService,
-    private _shortLinkService: ShortLinkService
+    private _shortLinkService: ShortLinkService,
+    private _permissionsService: PermissionsService
   ) {}
 
   @Get('/:id/statistics')
@@ -101,6 +106,21 @@ export class PostsController {
     return this._postsService.resolveComment(org.id, commentId, body.resolved);
   }
 
+  @Get('/approvals')
+  async getPendingApprovals(@GetOrgFromRequest() org: Organization) {
+    return this._postsService.getPendingApprovals(org.id);
+  }
+
+  @Post('/:id/approval')
+  @CheckPolicies([AuthorizationActions.Create, Sections.ADMIN])
+  async decideApproval(
+    @GetOrgFromRequest() org: Organization,
+    @Param('id') id: string,
+    @Body() body: ApprovalDecisionDto
+  ) {
+    return this._postsService.decideApproval(org.id, id, body.approve);
+  }
+
   @Get('/tags')
   async getTags(@GetOrgFromRequest() org: Organization) {
     return { tags: await this._postsService.getTags(org.id) };
@@ -142,6 +162,14 @@ export class PostsController {
   @Get('/find-slot')
   async findSlot(@GetOrgFromRequest() org: Organization) {
     return { date: await this._postsService.findFreeDateTime(org.id) };
+  }
+
+  @Get('/best-times/:integrationId')
+  getBestTimes(
+    @GetOrgFromRequest() org: Organization,
+    @Param('integrationId') integrationId: string
+  ) {
+    return this._postsService.getBestTimes(org.id, integrationId);
   }
 
   @Get('/find-slot/:id')
@@ -245,7 +273,47 @@ export class PostsController {
     }
 
     const body = await this._postsService.mapTypeToPost(rawBody, org.id);
-    return this._postsService.createPost(org.id, body, 'WEB');
+    return this._postsService.createPost(
+      org.id,
+      body,
+      'WEB',
+      false,
+      (body.type === 'schedule' || body.type === 'now') &&
+        this.needsApproval(org)
+    );
+  }
+
+  @Post('/import')
+  @CheckPolicies([AuthorizationActions.Create, Sections.POSTS_PER_MONTH])
+  async importPosts(
+    @GetOrgFromRequest() org: Organization,
+    @Body() body: ImportPostsDto
+  ) {
+    // the policy above only proves one post fits, the whole batch has to
+    if (
+      body.rows.length >
+      (await this._permissionsService.remainingPostsThisMonth(
+        org.id,
+        org.createdAt
+      ))
+    ) {
+      throw new SubscriptionException({
+        section: Sections.POSTS_PER_MONTH,
+        action: AuthorizationActions.Create,
+      });
+    }
+
+    return this._postsService.importPosts(
+      org.id,
+      body.rows,
+      this.needsApproval(org)
+    );
+  }
+
+  // members of a workspace that requires approval cannot publish directly
+  private needsApproval(org: Organization) {
+    // @ts-ignore
+    return org.requireApproval && org.users?.[0]?.role === 'USER';
   }
 
   @Post('/generator/draft')

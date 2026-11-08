@@ -36,6 +36,31 @@ export class PermissionsService {
     };
   }
 
+  async remainingPostsThisMonth(
+    orgId: string,
+    created_at: Date,
+    options?: { posts_per_month: number }
+  ) {
+    if (!process.env.STRIPE_PUBLISHABLE_KEY) {
+      return Infinity;
+    }
+
+    const limit =
+      options?.posts_per_month ??
+      (await this.getPackageOptions(orgId)).options.posts_per_month;
+    const createdAt =
+      (await this._subscriptionService.getSubscription(orgId))?.createdAt ||
+      created_at;
+    const totalMonthPast = Math.abs(dayjs(createdAt).diff(dayjs(), 'month'));
+    const checkFrom = dayjs(createdAt).add(totalMonthPast, 'month');
+    const count = await this._postsService.countPostsFromDay(
+      orgId,
+      checkFrom.toDate()
+    );
+
+    return limit - count;
+  }
+
   async check(
     orgId: string,
     created_at: Date,
@@ -103,19 +128,9 @@ export class PermissionsService {
 
       // check for posts per month
       if (section === Sections.POSTS_PER_MONTH) {
-        const createdAt =
-          (await this._subscriptionService.getSubscription(orgId))?.createdAt ||
-          created_at;
-        const totalMonthPast = Math.abs(
-          dayjs(createdAt).diff(dayjs(), 'month')
-        );
-        const checkFrom = dayjs(createdAt).add(totalMonthPast, 'month');
-        const count = await this._postsService.countPostsFromDay(
-          orgId,
-          checkFrom.toDate()
-        );
-
-        if (count < options.posts_per_month) {
+        if (
+          (await this.remainingPostsThisMonth(orgId, created_at, options)) > 0
+        ) {
           can(action, section);
           continue;
         }

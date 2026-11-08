@@ -15,6 +15,7 @@ import { OrganizationService } from '@gitroom/nestjs-libraries/database/prisma/o
 import { AddTeamMemberDto } from '@gitroom/nestjs-libraries/dtos/settings/add.team.member.dto';
 import { AdminAddTeamMemberDto } from '@gitroom/nestjs-libraries/dtos/settings/admin.add.team.member.dto';
 import { ShortlinkPreferenceDto } from '@gitroom/nestjs-libraries/dtos/settings/shortlink-preference.dto';
+import { ApprovalPreferenceDto } from '@gitroom/nestjs-libraries/dtos/settings/approval-preference.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthorizationActions, Sections } from '@gitroom/backend/services/auth/permissions/permission.exception.class';
 
@@ -86,6 +87,23 @@ export class SettingsController {
     return this._organizationService.updateShortlinkPreference(
       org.id,
       body.shortlink
+    );
+  }
+
+  @Get('/approval')
+  async getApprovalPreference(@GetOrgFromRequest() org: Organization) {
+    return this._organizationService.getApprovalPreference(org.id);
+  }
+
+  @Post('/approval')
+  @CheckPolicies([AuthorizationActions.Create, Sections.ADMIN])
+  async updateApprovalPreference(
+    @GetOrgFromRequest() org: Organization,
+    @Body() body: ApprovalPreferenceDto
+  ) {
+    return this._organizationService.updateApprovalPreference(
+      org.id,
+      body.requireApproval
     );
   }
 }

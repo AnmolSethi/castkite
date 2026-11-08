@@ -56,6 +56,7 @@ import { deleteDialog } from '@gitroom/react/helpers/delete.dialog';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import copy from 'copy-to-clipboard';
 import { stripHtmlValidation } from '@gitroom/helpers/utils/strip.html.validation';
+import { usePendingApprovals } from '@gitroom/frontend/components/approvals/approvals.component';
 import {
   fromUtc,
   newDayjs,
@@ -1039,7 +1040,7 @@ export const CalendarColumn: FC<{
         className={clsx(
           'relative flex flex-col flex-1 text-white rounded-[8px] min-h-[70px]',
           display === 'month' && 'mobile:min-h-[44px]',
-          canDrop && 'border border-[#612BD3]'
+          canDrop && 'border border-accentLine'
         )}
       >
         <div
@@ -1232,6 +1233,9 @@ const CalendarItem: FC<{
   } = props;
   const { disableXAnalytics } = useVariables();
   const user = useUser();
+  const { data: pendingApprovals } = usePendingApprovals();
+  const pendingApproval =
+    state === 'DRAFT' && !!pendingApprovals?.some((p) => p.id === post.id);
   const showCreationMethodBadge =
     user?.impersonate &&
     post.creationMethod &&
@@ -1300,7 +1304,7 @@ const CalendarItem: FC<{
       )}
       <div
         className={clsx(
-          'text-white text-[11px] max-h-[24px] h-[24px] min-h-[24px] w-full rounded-tr-[10px] rounded-tl-[10px] flex items-center justify-center gap-[6px] px-[5px] bg-btnPrimary',
+          'text-black text-[11px] max-h-[24px] h-[24px] min-h-[24px] w-full rounded-tr-[10px] rounded-tl-[10px] flex items-center justify-center gap-[6px] px-[5px] bg-btnPrimary',
           display === 'month' && 'mobile:hidden'
         )}
         style={{
@@ -1419,7 +1423,11 @@ const CalendarItem: FC<{
           )}
         >
           <div className="text-start">
-            {state === 'DRAFT' ? t('draft', 'Draft') + ': ' : ''}
+            {pendingApproval
+              ? t('needs_approval', 'Needs approval') + ': '
+              : state === 'DRAFT'
+              ? t('draft', 'Draft') + ': '
+              : ''}
           </div>
             <div className="w-full relative">
               <div className="absolute top-0 start-0 w-full text-ellipsis break-words line-clamp-1 text-start">

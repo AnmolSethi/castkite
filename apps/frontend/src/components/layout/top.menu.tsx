@@ -43,6 +43,27 @@ export const useMenuItem = () => {
       path: '/launches',
     },
     {
+      name: t('approvals', 'Approvals'),
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="21"
+          height="21"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <path
+            d="M8 12.5L10.5 15L16 9.5M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+      path: '/approvals',
+    },
+    {
       name: 'Agent',
       icon: (
         <svg
@@ -162,6 +183,8 @@ export const useMenuItem = () => {
       path: 'https://affiliate.postiz.com',
       role: ['ADMIN', 'SUPERADMIN', 'USER'],
       requireBilling: true,
+      // upstream Postiz affiliate program; hidden until Kitepost has its own
+      hide: true,
     },
     {
       name: t('billing', 'Billing'),
