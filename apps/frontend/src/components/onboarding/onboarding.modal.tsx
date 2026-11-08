@@ -17,7 +17,6 @@ import {
   getMcpConfig,
   isChatOnlyMcpClient,
   isSelfHosted,
-  localCliSteps,
   McpAuth,
   McpClient,
   mcpClients,
@@ -260,7 +259,6 @@ const onboardingAgents = [
   'Claude Code',
   'Cursor',
   'Codex',
-  'Grok Bot',
 ] as const;
 
 type OnboardingAgent = (typeof onboardingAgents)[number];
@@ -275,15 +273,13 @@ const otherAgents = mcpClients.filter(
 const apiTab = 'API' as const;
 type OnboardingTab = OnboardingAgent | typeof otherTab | typeof apiTab;
 
-const cliCommands = localCliSteps.map((step) => step.code);
-
 const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
   onBack,
   onNext,
 }) => {
   const t = useT();
   const user = useUser();
-  const { backendUrl, mcpUrl, billingEnabled } = useVariables();
+  const { backendUrl, mcpUrl } = useVariables();
   const [tab, setTab] = useState<OnboardingTab>('Claude');
   const [otherAgent, setOtherAgent] = useState<McpClient>(otherAgents[0]);
   // The client the cards describe: the tab itself, or the pick inside "Other agents"
@@ -295,7 +291,8 @@ const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
   const apiKey = user?.publicApi || '';
   const available = !!apiKey && !!user?.tier?.public_api;
   // the official connectors work for self-hosted installs too
-  const officialConnectors = billingEnabled || isSelfHosted;
+  // the directory connectors install Postiz's own listing, not Kitepost's
+  const officialConnectors = false;
 
   const { config, hint } =
     agent === apiTab
@@ -325,11 +322,6 @@ const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
       ? {
           href: mcpConnectorUrls.Cursor,
           label: t('add_to_cursor', 'Add to Cursor'),
-        }
-      : agent === 'Grok Bot' && officialConnectors
-      ? {
-          href: mcpConnectorUrls['Grok Bot'],
-          label: t('add_to_grok_bot', 'Add to Grok Bot'),
         }
       : null;
 
@@ -379,27 +371,6 @@ const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
 
   const apiSection = (
     <>
-      <div className="bg-newBgColorInnerInner rounded-[12px] border border-newBorder px-[20px] py-[14px] flex items-center justify-between gap-[12px]">
-        <div>
-          <div className="text-[15px] font-[600]">
-            {t('documentation', 'Documentation')}
-          </div>
-          <div className="text-[13px] text-customColor18 mt-[2px]">
-            {t(
-              'api_onboarding_description',
-              'Use the Kitepost API from your own code, n8n or any other automation'
-            )}
-          </div>
-        </div>
-        <a
-          className="cursor-pointer px-[24px] h-[44px] bg-brand hover:bg-brand/85 text-black transition-colors rounded-[8px] text-[14px] font-[600] flex items-center gap-[8px] shrink-0"
-          href="https://docs.postiz.com/public-api/introduction"
-          target="_blank"
-        >
-          <McpClientIcon client={apiTab} size={18} />
-          {t('read_the_api_docs', 'Read the API docs')}
-        </a>
-      </div>
       <div className="bg-newBgColorInnerInner rounded-[12px] border border-newBorder overflow-hidden">
         <div className="bg-newBgColorInner px-[20px] py-[14px] border-b border-newBorder">
           <div className="text-[15px] font-[600]">
@@ -491,7 +462,10 @@ const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
                 onClick={() => setAuth(m)}
               >
                 {m === 'oauth'
-                  ? t('sign_in_no_api_key', 'Sign in with Kitepost (no API key)')
+                  ? t(
+                      'sign_in_no_api_key',
+                      'Sign in with Kitepost (no API key)'
+                    )
                   : t('api_key', 'API Key')}
               </button>
             ))}
@@ -521,31 +495,6 @@ const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
             )}
             <CopyButton text={config} label={t('copy', 'Copy')} />
           </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const cliSection = (
-    <div className="bg-newBgColorInnerInner rounded-[12px] border border-newBorder overflow-hidden flex flex-col">
-      <div className="bg-newBgColorInner px-[20px] py-[14px] border-b border-newBorder">
-        <div className="text-[15px] font-[600]">{t('cli', 'CLI')}</div>
-        <div className="text-[13px] text-customColor18 mt-[2px]">
-          {t(
-            'cli_onboarding_description',
-            'Install the Kitepost CLI and the skill that teaches your agent how to use it'
-          )}
-        </div>
-      </div>
-      <div className="p-[20px] flex flex-col gap-[8px] flex-1">
-        <pre className="bg-newBgColorInner border border-newBorder rounded-[8px] p-[12px] text-[12px] whitespace-pre-wrap break-all overflow-x-auto leading-[1.5] flex-1">
-          {cliCommands.join('\n')}
-        </pre>
-        <div className="flex gap-[8px]">
-          <CopyButton
-            text={cliCommands.join(' && ')}
-            label={t('copy', 'Copy')}
-          />
         </div>
       </div>
     </div>
@@ -618,10 +567,7 @@ const OnboardingStep2: FC<{ onBack: () => void; onNext: () => void }> = ({
           ) : (
             <>
               {connectorSection}
-              <div className="grid grid-cols-2 gap-[16px]">
-                {mcpSection}
-                {cliSection}
-              </div>
+              {mcpSection}
             </>
           )}
         </div>

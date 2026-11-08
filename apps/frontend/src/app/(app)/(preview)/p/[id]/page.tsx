@@ -59,7 +59,7 @@ export default async function Auth(
             className="flex items-center gap-[10px] text-textColor"
           >
             <div className="w-[44px]">
-              <SafeImage src={'/postiz.svg'} width={44} height={44} alt="Logo" />
+              <SafeImage src={'/kitepost.svg'} width={44} height={44} alt="Kitepost" />
             </div>
             <div>
               <svg

@@ -37,21 +37,21 @@ export class AgenciesService {
     if (action === 'approve') {
       await this._notificationService.sendEmail(
         agency?.user?.email!,
-        'Your Agency has been approved and added to Postiz 🚀',
+        'Your Agency has been approved and added to Kitepost 🚀',
         `
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Agency has been approved and added to Postiz 🚀</title>
+    <title>Your Agency has been approved and added to Kitepost 🚀</title>
 </head>
 
 <body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
   Hi there, <br /><br />
-  Your agency ${agency?.name} has been added to Postiz!<br />
+  Your agency ${agency?.name} has been added to Kitepost!<br />
   You can <a href="https://postiz.com/agencies/${agency?.slug}">check it here</a><br />
-  It will appear on the main agency of Postiz in the next 24 hours.<br /><br />
+  It will appear on the main agency of Kitepost in the next 24 hours.<br /><br />
 </body>
 </html>`
       );
@@ -73,7 +73,7 @@ export class AgenciesService {
 
 <body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
   Hi there, <br /><br />
-  Your agency ${agency?.name} has been declined to Postiz!<br />
+  Your agency ${agency?.name} has been declined to Kitepost!<br />
   If you think we have made a mistake, please reply to this email and let us know
 </body>
 </html>`
@@ -85,7 +85,7 @@ export class AgenciesService {
   async createAgency(user: User, body: CreateAgencyDto) {
     const agency = await this._agenciesRepository.createAgency(user, body);
     await this._notificationService.sendEmail(
-      'nevo@postiz.com',
+      process.env.EMAIL_FROM_ADDRESS!,
       'New agency created',
       `
 <html lang="en">
@@ -203,7 +203,7 @@ export class AgenciesService {
         </tr>
         <tr>
             <td style="padding: 20px; text-align: center; background-color: #f4f4f4;">
-                <p style="color: #777; font-size: 14px;">&copy; 2024 Your Gitroom Limited All rights reserved.</p>
+                <p style="color: #777; font-size: 14px;">&copy; 2024 Kitepost All rights reserved.</p>
             </td>
         </tr>
     </table>

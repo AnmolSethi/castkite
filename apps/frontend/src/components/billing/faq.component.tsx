@@ -30,7 +30,7 @@ const useFaqList = () => {
       ),
       description: t(
         'faq_postiz_gitroom_is_proudly_open_source',
-        `Kitepost is proudly open-source! We believe in an ethical and transparent culture, meaning that Kitepost will live forever. You can check out the entire code or use it for personal projects. To view the open-source repository, <a href="https://github.com/gitroomhq/postiz-app" target="_blank" style="text-decoration: underline;">click here</a>.`
+        `Kitepost is proudly open-source! We believe in an ethical and transparent culture, meaning that Kitepost will live forever. You can check out the entire code or use it for personal projects. To view the open-source repository, <a href="https://github.com/AnmolSethi/kitepost" target="_blank" style="text-decoration: underline;">click here</a>.`
       ),
     },
     {
