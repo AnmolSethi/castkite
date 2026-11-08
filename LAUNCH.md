@@ -126,6 +126,9 @@ Merged from the `purge-deleted-organizations` branch.
 
 Before launch:
 
+- [ ] **Its unit test has not run.** `jest.config.ts` needs `@nx/jest`, which
+      is not installed, so `organization.repository.spec.ts` could not run
+      here. Typechecks pass.
 - [ ] **It has never run against a real database.** Run it once against a copy
       of production data (or a staging database with deleted test
       organizations) and confirm what was removed and what was kept.
@@ -168,8 +171,11 @@ library were added.
 - [ ] In Mintlify (free plan), connect this repository with `apps/docs` as the
       docs directory.
 - [ ] Add `docs.castkite.com` as a custom domain (CNAME at your DNS provider).
-- [ ] **Retake the screenshots.** `apps/docs/images` (7 MB) still shows Postiz's
-      old purple interface.
+- [ ] **Take the screenshots.** Postiz's screenshots were removed. The seven
+      pages that need one show a placeholder (`apps/docs/images/**/*.svg`)
+      that names the screen to capture and the `.png` path to save it as.
+      After adding a PNG, change that page's `<img src>` from `.svg` to `.png`
+      and delete the placeholder.
 - [ ] Run the checks after any edit:
 
   ```bash
@@ -204,16 +210,12 @@ Typechecks pass, but these were never exercised in a running app:
   Nothing in the app sends them today.
 - **`apps/sdk`** is Postiz's npm SDK and defaults to `api.postiz.com`. It is not
   part of the hosted app.
-- **`README.md`** still describes Postiz, apart from its doc links.
 - **`.github/workflows`** includes Postiz's container build, AWS deploy and
   extension publish workflows. GitHub Actions are disabled on the repository;
   delete or rewrite them before you turn Actions on.
 - **Internal names kept on purpose**, because renaming them breaks existing
   setups: the `POSTIZ_*` environment variables, the `x-postiz-*` API headers,
   translation keys, and the AI agent id `postiz`.
-- **Branch name**: the default branch is still `kitepost`. Rename it to `main`
-  in GitHub's settings (GitHub redirects the old name) and run
-  `git branch -m kitepost main` locally.
 
 ---
 
