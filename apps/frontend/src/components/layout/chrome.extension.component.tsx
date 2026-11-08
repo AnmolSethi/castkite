@@ -1,13 +1,17 @@
 import { useVariables } from '@gitroom/react/helpers/variable.context';
+import { useT } from '@gitroom/react/translation/get.transation.service.client';
 export const ChromeExtensionComponent = () => {
-  const { billingEnabled } = useVariables();
-  if (!billingEnabled) {
+  const t = useT();
+  const { billingEnabled, extensionId } = useVariables();
+  if (!billingEnabled || !extensionId) {
     return null;
   }
   return (
     <a
-      href="https://chromewebstore.google.com/detail/postiz/cidhffagahknaeodkplfbcpfeielnkjl"
+      href={`https://chromewebstore.google.com/detail/${extensionId}`}
       target="_blank"
+      rel="noopener noreferrer"
+      aria-label={t('chrome_extension', 'Castkite Chrome extension')}
       className="hover:text-newTextColor"
     >
       <svg
