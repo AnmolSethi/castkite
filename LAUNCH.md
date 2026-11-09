@@ -31,16 +31,33 @@ Last updated: November 8, 2026.
 
 ### Deploy your own code, not Postiz's
 
-- [ ] **`docker-compose.yaml` still runs Postiz's image**
-      (`ghcr.io/gitroomhq/postiz-app:latest`). Deploying it as-is runs Postiz,
-      without any Castkite change. Build your own image from this repository:
+- [x] **Castkite has its own image**: `ghcr.io/anmolsethi/castkite`, built
+      from `Dockerfile.dev` by `.github/workflows/build-containers.yml` for
+      amd64 and arm64. `docker-compose.yaml` points at it. Postiz's own
+      workflows (AWS deploy, staging merges, issue bots, extension upload to
+      their Nextcloud) were removed.
+- [ ] **Turn on GitHub Actions** for the repository (Settings → Actions →
+      General → Allow all actions). It is off, so no workflow runs yet.
+- [ ] **Publish the first image**: push a version tag, or run "Build
+      Containers" by hand from the Actions tab. Each run pushes
+      `<tag>-amd64`, `<tag>-arm64`, `<tag>` and `latest`.
 
   ```bash
-  docker build --target dist -t castkite:latest -f Dockerfile.dev .
+  git tag v1.0.0 && git push origin v1.0.0
   ```
 
-  Push it to your own registry and point `docker-compose.yaml` (or your host) at
-  it.
+- [ ] **Let the server pull it**: GHCR packages start private. Either make
+      the `castkite` package public (Package settings → Change visibility) or
+      run `docker login ghcr.io` on the server with a token that has
+      `read:packages`.
+
+  To build the same image on your own machine instead (Docker needs about
+  8 GB of memory for the frontend build):
+
+  ```bash
+  docker build -f Dockerfile.dev -t castkite:latest .
+  ```
+
 - [ ] **Apply the database schema** on the production database. This fork adds
       columns: `Organization.requireApproval`, `Organization.purgedAt`,
       `Post.pendingApproval` (with an index) and `Signatures.name`, and the
@@ -49,6 +66,9 @@ Last updated: November 8, 2026.
   ```bash
   pnpm run prisma-db-push
   ```
+
+  The image runs this on every start (`pnpm run pm2`), so with the image it
+  happens on the first deploy; check its log for errors.
 
 - [ ] **Environment variables** (see `.env.example` for the full list):
 

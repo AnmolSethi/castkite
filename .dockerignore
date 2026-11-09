@@ -21,3 +21,8 @@ dist
 .git
 .github
 reports
+# never bake local secrets or tooling state into the image
+.env
+.env.*
+!.env.example
+.claude

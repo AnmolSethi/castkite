@@ -703,13 +703,20 @@ export class PostsRepository {
     });
   }
 
-  // ids from the request that are already queued or published in this org
-  countQueuedOrPublished(orgId: string, ids: string[]) {
+  // ids from the request that are already queued on a metered provider in this
+  // org; a published post saved again is a republish and costs again
+  countQueuedMetered(
+    orgId: string,
+    ids: string[],
+    providerIdentifiers: string[]
+  ) {
     return this._post.model.post.count({
       where: {
         organizationId: orgId,
         id: { in: ids },
-        OR: [{ deletedAt: null, state: 'QUEUE' }, { state: 'PUBLISHED' }],
+        deletedAt: null,
+        state: 'QUEUE',
+        integration: { providerIdentifier: { in: providerIdentifiers } },
       },
     });
   }

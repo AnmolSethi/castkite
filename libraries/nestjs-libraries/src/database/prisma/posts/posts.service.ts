@@ -1238,13 +1238,17 @@ export class PostsService {
         .filter((p) => this.isMeteredProvider((p.settings as any)?.__type))
         .flatMap((p) => p.value || []);
       const ids = values.map((v) => v.id).filter(Boolean) as string[];
-      // rows already queued or published were counted when they were queued;
-      // anything else (new rows, drafts, unknown ids) is counted now
+      // rows still queued on a metered provider were counted when queued;
+      // anything else (new rows, drafts, republishes, unknown ids) counts now
       await this.checkMeteredPosts(
         orgId,
         values.length -
           (ids.length
-            ? await this._postRepository.countQueuedOrPublished(orgId, ids)
+            ? await this._postRepository.countQueuedMetered(
+                orgId,
+                ids,
+                this._integrationManager.getMeteredPostsIntegrations()
+              )
             : 0)
       );
     }
