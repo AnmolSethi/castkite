@@ -56,11 +56,10 @@ The user kept Postiz's 4 plans and prices: Standard $29 (5 channels), Team $39
 
 ## Not verified yet — do these first
 
-1. **The Docker image has not finished a build.** A local build was running
-   when this was written (packages installed fine; the app build step had just
-   started, with Docker limited to 4 GB of memory). Run it again; if it dies
-   with an out-of-memory error, give Docker 8 GB (Docker Desktop → Settings →
-   Resources):
+1. **The Docker image has not finished a build.** On the previous Mac, with
+   Docker limited to 4 GB, it ran out of memory in the frontend's type check
+   (package install and the frontend compile worked). Give Docker at least
+   8 GB (Docker Desktop → Settings → Resources) and build:
 
    ```bash
    docker build -f Dockerfile.dev -t castkite:local .
