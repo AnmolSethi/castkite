@@ -183,6 +183,8 @@ export interface SocialProvider
   refreshWait?: boolean;
   convertToJPEG?: boolean;
   stripLinks?: () => boolean;
+  // the provider's API bills the app per post, so posts are capped per plan
+  meteredPosts?: boolean;
   refreshCron?: boolean;
   refreshErrorMessage?(err: any): string | undefined;
   dto?: any;

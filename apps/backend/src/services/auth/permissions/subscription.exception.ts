@@ -50,6 +50,11 @@ const getErrorMessage = (error: {
         default:
           return 'You have reached the maximum number of generated videos for your subscription. Please upgrade your subscription to generate more videos.';
       }
+    case Sections.AI:
+      switch (error.action) {
+        default:
+          return 'You have used the AI writing included in your subscription for this month. Please upgrade your subscription to keep using it.';
+      }
     case Sections.CLIPPING_MINUTES:
       switch (error.action) {
         default:

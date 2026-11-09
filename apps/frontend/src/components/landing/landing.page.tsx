@@ -372,10 +372,13 @@ export const LandingPage = async () => {
                 tier.posts_per_month >= 1000000
                   ? t('landing_plan_unlimited', 'Unlimited posts')
                   : t('landing_plan_posts', '{{count}} posts a month', { count: tier.posts_per_month }),
+                t('landing_plan_x_posts', 'Up to {{count}} of them to X', { count: tier.metered_posts_per_month }),
                 tier.team_members
                   ? t('landing_plan_team', 'Team members and approvals')
                   : t('landing_plan_solo', 'One user'),
                 t('landing_plan_images', '{{count}} AI images a month', { count: tier.image_generation_count }),
+                t('landing_plan_videos', '{{count}} AI videos a month', { count: tier.generate_videos }),
+                t('landing_plan_ai_text', '{{count}} AI writing requests a month', { count: tier.ai_text_count }),
                 t('landing_plan_webhooks', '{{count}} webhooks', { count: tier.webhooks }),
                 ...(tier.public_api ? [t('landing_plan_api', 'Public API and MCP')] : []),
               ];

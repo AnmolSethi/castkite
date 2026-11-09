@@ -21,7 +21,14 @@ import { MastraService } from '@gitroom/nestjs-libraries/chat/mastra.service';
 import { Request, Response } from 'express';
 import { RequestContext } from '@mastra/core/di';
 import { CheckPolicies } from '@gitroom/backend/services/auth/permissions/permissions.ability';
-import { AuthorizationActions, Sections } from '@gitroom/backend/services/auth/permissions/permission.exception.class';
+import {
+  AuthorizationActions,
+  Sections,
+  SubscriptionException,
+} from '@gitroom/backend/services/auth/permissions/permission.exception.class';
+
+// copilot requests that reach the model; info, connect and stop do not
+const MODEL_METHODS = ['agent/run', 'agent/suggest', 'transcribe'];
 
 export type ChannelsContext = {
   integrations: string;
@@ -45,8 +52,25 @@ export class CopilotController {
     private _subscriptionService: SubscriptionService,
     private _mastraService: MastraService
   ) {}
+
+  private async chargeAiText(req: Request, organization: Organization) {
+    if (
+      MODEL_METHODS.includes(req?.body?.method) &&
+      !(await this._subscriptionService.useAiTextCredit(organization))
+    ) {
+      throw new SubscriptionException({
+        section: Sections.AI,
+        action: AuthorizationActions.Create,
+      });
+    }
+  }
+
   @Post('/chat')
-  chatAgent(@Req() req: Request, @Res() res: Response) {
+  async chatAgent(
+    @Req() req: Request,
+    @Res() res: Response,
+    @GetOrgFromRequest() organization: Organization
+  ) {
     if (
       process.env.OPENAI_API_KEY === undefined ||
       process.env.OPENAI_API_KEY === ''
@@ -54,6 +78,7 @@ export class CopilotController {
       Logger.warn('OpenAI API key not set, chat functionality will not work');
       return;
     }
+    await this.chargeAiText(req, organization);
 
     const copilotRuntimeHandler = copilotRuntimeNodeHttpEndpoint({
       endpoint: '/copilot/chat',
@@ -81,6 +106,7 @@ export class CopilotController {
       Logger.warn('OpenAI API key not set, chat functionality will not work');
       return;
     }
+    await this.chargeAiText(req, organization);
     const mastra = await this._mastraService.mastra();
     const requestContext = new RequestContext<ChannelsContext>();
     requestContext.set(
@@ -117,7 +143,7 @@ export class CopilotController {
   calculateCredits(
     @GetOrgFromRequest() organization: Organization,
     @Query('type')
-    type: 'ai_images' | 'ai_videos' | 'clipping_minutes'
+    type: 'ai_images' | 'ai_videos' | 'ai_text' | 'clipping_minutes'
   ) {
     return this._subscriptionService.checkCredits(
       organization,

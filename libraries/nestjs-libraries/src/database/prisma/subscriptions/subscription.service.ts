@@ -7,6 +7,8 @@ import { Organization } from '@prisma/client';
 import dayjs from 'dayjs';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 
+const TRIAL_AI_IMAGES = 10;
+
 @Injectable()
 export class SubscriptionService {
   constructor(
@@ -370,7 +372,7 @@ export class SubscriptionService {
     return this._subscriptionRepository.getSubscription(organizationId);
   }
 
-  private currentPeriodStart(subscriptionCreatedAt: Date) {
+  currentPeriodStart(subscriptionCreatedAt: Date) {
     let date = dayjs(subscriptionCreatedAt);
     while (date.isBefore(dayjs())) {
       date = date.add(1, 'month');
@@ -397,6 +399,26 @@ export class SubscriptionService {
     return { deleted: count };
   }
 
+  // one credit per AI writing request that reaches the model; false when the
+  // month's fair-use cap is used up
+  async useAiTextCredit(organization: Organization) {
+    if (!process.env.STRIPE_PUBLISHABLE_KEY) {
+      return true;
+    }
+
+    if ((await this.checkCredits(organization, 'ai_text')).credits <= 0) {
+      return false;
+    }
+
+    await this._subscriptionRepository.chargeCredits(
+      makeId(20),
+      organization.id,
+      'ai_text',
+      1
+    );
+    return true;
+  }
+
   async checkCredits(organization: Organization, checkType = 'ai_images') {
     // @ts-ignore
     const type = organization?.subscription?.subscriptionTier || 'FREE';
@@ -411,9 +433,14 @@ export class SubscriptionService {
     );
     const imageGenerationCount =
       checkType === 'ai_images'
-        ? pricing[type].image_generation_count
+        ? organization.isTrailing
+          ? // a trial gets a few images, so farming trials costs us little
+            Math.min(pricing[type].image_generation_count, TRIAL_AI_IMAGES)
+          : pricing[type].image_generation_count
         : checkType === 'clipping_minutes'
         ? pricing[type].clipping_minutes
+        : checkType === 'ai_text'
+        ? pricing[type].ai_text_count
         : pricing[type].generate_videos;
 
     const totalUse = await this._subscriptionRepository.getCreditsFrom(

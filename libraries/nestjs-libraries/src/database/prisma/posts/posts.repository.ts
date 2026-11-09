@@ -658,13 +658,16 @@ export class PostsRepository {
     });
   }
 
-  countPostsFromDay(orgId: string, date: Date) {
+  countPostsFromDay(orgId: string, date: Date, providerIdentifiers?: string[]) {
     return this._post.model.post.count({
       where: {
         organizationId: orgId,
         publishDate: {
           gte: date,
         },
+        ...(providerIdentifiers
+          ? { integration: { providerIdentifier: { in: providerIdentifiers } } }
+          : {}),
         OR: [
           {
             deletedAt: null,

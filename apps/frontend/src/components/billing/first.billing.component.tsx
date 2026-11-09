@@ -324,6 +324,14 @@ export const useBillingFeatures = (tier: string) => {
           : currentPricing.posts_per_month,
     });
 
+    if (currentPricing.metered_posts_per_month) {
+      list.push({
+        key: 'billing_x_posts_per_month',
+        defaultValue: 'of them to X',
+        prefix: currentPricing.metered_posts_per_month,
+      });
+    }
+
     if (currentPricing.team_members) {
       list.push({
         key: 'billing_unlimited_team_members',
@@ -336,6 +344,11 @@ export const useBillingFeatures = (tier: string) => {
         defaultValue: 'AI auto-complete',
       });
       list.push({ key: 'billing_ai_copilots', defaultValue: 'AI copilots' });
+      list.push({
+        key: 'billing_ai_writing_per_month',
+        defaultValue: 'AI writing requests per month',
+        prefix: currentPricing.ai_text_count,
+      });
       list.push({
         key: 'billing_ai_autocomplete',
         defaultValue: 'AI Autocomplete',

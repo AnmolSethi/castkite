@@ -60,7 +60,7 @@ class ImagesSlidesParams {
   placement: 'text-to-image',
   tools: [{ functionName: 'loadVoices', output: 'voice id' }],
   dto: ImagesSlidesParams,
-  trial: true,
+  trial: false,
   available:
     !!process.env.ELEVENSLABS_API_KEY &&
     !!process.env.TRANSLOADIT_AUTH &&

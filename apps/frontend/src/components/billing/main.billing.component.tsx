@@ -75,7 +75,12 @@ export const Prorate: FC<{
   );
 };
 
-const creditTypes = ['ai_images', 'ai_videos', 'clipping_minutes'] as const;
+const creditTypes = [
+  'ai_images',
+  'ai_videos',
+  'ai_text',
+  'clipping_minutes',
+] as const;
 
 const useLoadCredits = () => {
   const fetch = useFetch();
@@ -132,6 +137,7 @@ const BillingCycle: FC<{
   const { data: renewal } = useRenewal();
   const { data: images } = useCredits('ai_images');
   const { data: videos } = useCredits('ai_videos');
+  const { data: aiText } = useCredits('ai_text');
   const { data: clipping } = useCredits('clipping_minutes');
 
   const usage = [
@@ -144,6 +150,11 @@ const BillingCycle: FC<{
       label: t('billing_ai_videos', 'AI videos'),
       total: pricing[tier]?.generate_videos,
       left: videos?.credits,
+    },
+    {
+      label: t('billing_ai_writing', 'AI writing requests'),
+      total: pricing[tier]?.ai_text_count,
+      left: aiText?.credits,
     },
     {
       label: t('billing_clipping_minutes', 'Clipping minutes'),

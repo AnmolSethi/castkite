@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   Injectable,
   NotFoundException,
   ValidationPipe,
@@ -38,6 +39,8 @@ import { UploadFactory } from '@gitroom/nestjs-libraries/upload/upload.factory';
 import { Readable } from 'stream';
 import { resolve, sep } from 'path';
 import { OpenaiService } from '@gitroom/nestjs-libraries/openai/openai.service';
+import { SubscriptionService } from '@gitroom/nestjs-libraries/database/prisma/subscriptions/subscription.service';
+import { pricing } from '@gitroom/nestjs-libraries/database/prisma/subscriptions/pricing';
 dayjs.extend(utc);
 import * as Sentry from '@sentry/nestjs';
 import { TemporalService } from 'nestjs-temporal-core';
@@ -106,7 +109,8 @@ export class PostsService {
     private _shortLinkService: ShortLinkService,
     private _openaiService: OpenaiService,
     private _temporalService: TemporalService,
-    private _refreshIntegrationService: RefreshIntegrationService
+    private _refreshIntegrationService: RefreshIntegrationService,
+    private _subscriptionService: SubscriptionService
   ) {}
 
   searchForMissingThreeHoursPosts() {
@@ -961,6 +965,48 @@ export class PostsService {
     return this._postRepository.countPostsFromDay(orgId, date);
   }
 
+  private isMeteredProvider(identifier?: string) {
+    return (
+      !!identifier &&
+      !!this._integrationManager.getSocialIntegration(identifier)?.meteredPosts
+    );
+  }
+
+  // providers whose API bills us per post get a monthly cap per plan
+  private async checkMeteredPosts(orgId: string, newPosts: number) {
+    if (!process.env.STRIPE_PUBLISHABLE_KEY || !newPosts) {
+      return;
+    }
+
+    const subscription = await this._subscriptionService.getSubscription(orgId);
+    const limit =
+      pricing[subscription?.subscriptionTier || 'FREE']
+        ?.metered_posts_per_month || 0;
+    const metered = this._integrationManager.getMeteredPostsIntegrations();
+    const used = subscription
+      ? await this._postRepository.countPostsFromDay(
+          orgId,
+          this._subscriptionService
+            .currentPeriodStart(subscription.createdAt)
+            .toDate(),
+          metered
+        )
+      : 0;
+
+    if (used + newPosts > limit) {
+      const names = metered
+        .map((p) => this._integrationManager.getSocialIntegration(p).name)
+        .join(', ');
+      throw new HttpException(
+        `Your plan includes ${limit} posts a month to ${names} and ${Math.max(
+          limit - used,
+          0
+        )} are left. Please upgrade your subscription to post more.`,
+        402
+      );
+    }
+  }
+
   getPostByForWebhookId(id: string, integrationId: string) {
     return this._postRepository.getPostByForWebhookId(id, integrationId);
   }
@@ -1187,6 +1233,18 @@ export class PostsService {
     const batchId = uuidv4();
     // a post waiting for approval is stored as a draft so no workflow starts
     const type = pendingApproval ? 'draft' : body.type;
+    if (type === 'schedule' || type === 'now') {
+      await this.checkMeteredPosts(
+        orgId,
+        body.posts
+          .filter((p) => this.isMeteredProvider((p.settings as any)?.__type))
+          // rows with an id already exist and were counted when created
+          .reduce(
+            (all, p) => all + (p.value || []).filter((v) => !v.id).length,
+            0
+          )
+      );
+    }
     for (const post of body.posts) {
       if (
         (body.type === 'schedule' || body.type === 'now') &&
@@ -1437,6 +1495,15 @@ export class PostsService {
     }
 
     const state: State = status === 'draft' ? 'DRAFT' : 'QUEUE';
+    if (state === 'QUEUE' && getPostById.state === 'DRAFT') {
+      // shortcut: counts the first post of a thread only, fine while threads are rare
+      await this.checkMeteredPosts(
+        orgId,
+        this.isMeteredProvider(getPostById.integration?.providerIdentifier)
+          ? 1
+          : 0
+      );
+    }
     await this._postRepository.changeState(id, state);
 
     try {
@@ -1576,6 +1643,15 @@ export class PostsService {
 
     if (action === 'schedule' && !republish) {
       this.guardAgainstRepublish(getPostById, 'changeDate');
+    }
+
+    if (action === 'schedule' && getPostById.state === 'DRAFT') {
+      await this.checkMeteredPosts(
+        orgId,
+        this.isMeteredProvider(getPostById.integration?.providerIdentifier)
+          ? 1
+          : 0
+      );
     }
 
     // schedule: Set status to QUEUE and change date (reschedule the post)

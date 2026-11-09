@@ -128,11 +128,18 @@ Filled in for India on November 8, 2026. Before launch:
 
 ### Pricing
 
-- [ ] **Prices are still Postiz's**: Standard $29, Team $39, Pro $49, Ultimate
-      $99 a month. Edit
+- [x] **Prices kept at Postiz's**: Standard $29, Team $39, Pro $49, Ultimate
+      $99 a month, set in
       `libraries/nestjs-libraries/src/database/prisma/subscriptions/pricing.ts`
-      and create matching products in Stripe. The landing page reads its prices
-      from that file.
+      (the landing page reads its prices from that file). Each plan also caps
+      X posts (`metered_posts_per_month`, because the X API bills us per post)
+      and AI writing requests (`ai_text_count`). Clipping is off, AI images
+      use medium quality, and trials get 10 AI images and no AI videos.
+- [ ] **Create the matching products in Stripe** (monthly and yearly).
+- [ ] **Check the two vendor prices the caps rest on**: the X API charge per
+      post (and per post with a link), and Evolink's Seedance price per second.
+- [ ] **Decide the Pro and Ultimate video counts** (30 and 60). They are the
+      only limits where a customer using everything costs more than they pay.
 
 ---
 
@@ -228,6 +235,11 @@ scheduled), the Approvals page, and light mode on the calendar and Approvals.
 X posts imported from CSV now default to "everyone can reply"; before, every X
 row was rejected.
 
+The plan caps were checked against the local backend with billing on, on
+November 9, 2026: the 101st X post of the month and scheduling an X draft past
+the cap were refused, AI writing stopped at the plan's limit, and a trial got 10
+AI images.
+
 Still never exercised in a running app:
 
 - [ ] Posting to a real channel (the local run used a fake one).
@@ -235,7 +247,6 @@ Still never exercised in a running app:
       checked on a local dev server, desktop and mobile).
 - [ ] Keyboard focus on the landing page.
 - [ ] The rebranded extension in Chrome.
-- [ ] The purge job (section 2).
 - [ ] Sign-up shows the new favicon and links; the API settings page shows
       manual MCP setup only.
 

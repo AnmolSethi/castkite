@@ -27,6 +27,7 @@ import { CreateTagDto } from '@gitroom/nestjs-libraries/dtos/posts/create.tag.dt
 import { ApprovalDecisionDto } from '@gitroom/nestjs-libraries/dtos/posts/approval.decision.dto';
 import { ImportPostsDto } from '@gitroom/nestjs-libraries/dtos/posts/import.posts.dto';
 import { PermissionsService } from '@gitroom/backend/services/auth/permissions/permissions.service';
+import { SubscriptionService } from '@gitroom/nestjs-libraries/database/prisma/subscriptions/subscription.service';
 import {
   AuthorizationActions,
   Sections,
@@ -46,7 +47,8 @@ export class PostsController {
     private _postsService: PostsService,
     private _agentGraphService: AgentGraphService,
     private _shortLinkService: ShortLinkService,
-    private _permissionsService: PermissionsService
+    private _permissionsService: PermissionsService,
+    private _subscriptionService: SubscriptionService
   ) {}
 
   @Get('/:id/statistics')
@@ -332,6 +334,13 @@ export class PostsController {
     @Body() body: GeneratorDto,
     @Res({ passthrough: false }) res: Response
   ) {
+    if (!(await this._subscriptionService.useAiTextCredit(org))) {
+      throw new SubscriptionException({
+        section: Sections.AI,
+        action: AuthorizationActions.Create,
+      });
+    }
+
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     try {
       for await (const event of this._agentGraphService.start(org.id, body)) {

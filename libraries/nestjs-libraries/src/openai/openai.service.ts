@@ -82,6 +82,8 @@ Clips must not overlap. Write the title and the post in this language, whatever 
       await openai.images.generate({
         prompt,
         model: 'chatgpt-image-latest',
+        // medium is plenty for social posts at about a quarter of auto's price
+        quality: 'medium',
         size: isVertical ? '1024x1536' : '1024x1024',
       })
     ).data[0];

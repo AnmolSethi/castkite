@@ -242,6 +242,11 @@ export class IntegrationManager {
   getAllowedSocialsIntegrations() {
     return socialIntegrationList.map((p) => p.identifier);
   }
+  getMeteredPostsIntegrations() {
+    return socialIntegrationList
+      .filter((p) => p.meteredPosts)
+      .map((p) => p.identifier);
+  }
   getSocialIntegration(integration: string): SocialProvider {
     return socialIntegrationList.find((i) => i.identifier === integration)!;
   }
