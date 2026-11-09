@@ -58,16 +58,22 @@ The user kept Postiz's 4 plans and prices: Standard $29 (5 channels), Team $39
 
 1. **The Docker image has not finished a build.** On the previous Mac, with
    Docker limited to 4 GB, it ran out of memory in the frontend's type check
-   (package install and the frontend compile worked). Give Docker at least
-   8 GB (Docker Desktop → Settings → Resources) and build:
+   (package install and the frontend compile worked). Build it on the Mac
+   with 24 GB:
 
-   ```bash
-   docker build -f Dockerfile.dev -t castkite:local .
-   ```
+   1. Pull `main`.
+   2. In Docker Desktop, set memory to at least 8 GB (Settings → Resources);
+      Docker's default can be lower than the Mac's RAM.
+   3. Build the image:
 
-   Then start it with `docker-compose.yaml` (swap the image for
-   `castkite:local`) and check that `http://localhost:4007` loads and you can
-   sign up.
+      ```bash
+      docker build -f Dockerfile.dev -t castkite:local .
+      ```
+
+   4. In `docker-compose.yaml`, swap `ghcr.io/anmolsethi/castkite:latest`
+      for `castkite:local` (don't commit that swap), run
+      `docker compose up -d`, then check that `http://localhost:4007` loads
+      and you can sign up.
 2. **Rerun the cap tests** after the last fix in this commit (only queued X
    posts are skipped when saved again; republishing counts). The script used is
    at the end of this file; it passed on the commit before.
