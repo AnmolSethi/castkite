@@ -658,16 +658,13 @@ export class PostsRepository {
     });
   }
 
-  countPostsFromDay(orgId: string, date: Date, providerIdentifiers?: string[]) {
+  countPostsFromDay(orgId: string, date: Date) {
     return this._post.model.post.count({
       where: {
         organizationId: orgId,
         publishDate: {
           gte: date,
         },
-        ...(providerIdentifiers
-          ? { integration: { providerIdentifier: { in: providerIdentifiers } } }
-          : {}),
         OR: [
           {
             deletedAt: null,
@@ -679,6 +676,40 @@ export class PostsRepository {
             state: 'PUBLISHED',
           },
         ],
+      },
+    });
+  }
+
+  // a post counts in the period it was created or is published in, so
+  // backdating the publish date does not slip it out of the count
+  countMeteredPostsFrom(
+    orgId: string,
+    date: Date,
+    providerIdentifiers: string[]
+  ) {
+    return this._post.model.post.count({
+      where: {
+        organizationId: orgId,
+        integration: { providerIdentifier: { in: providerIdentifiers } },
+        AND: [
+          {
+            OR: [{ createdAt: { gte: date } }, { publishDate: { gte: date } }],
+          },
+          {
+            OR: [{ deletedAt: null, state: 'QUEUE' }, { state: 'PUBLISHED' }],
+          },
+        ],
+      },
+    });
+  }
+
+  // ids from the request that are already queued or published in this org
+  countQueuedOrPublished(orgId: string, ids: string[]) {
+    return this._post.model.post.count({
+      where: {
+        organizationId: orgId,
+        id: { in: ids },
+        OR: [{ deletedAt: null, state: 'QUEUE' }, { state: 'PUBLISHED' }],
       },
     });
   }

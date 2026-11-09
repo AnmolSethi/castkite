@@ -984,7 +984,7 @@ export class PostsService {
         ?.metered_posts_per_month || 0;
     const metered = this._integrationManager.getMeteredPostsIntegrations();
     const used = subscription
-      ? await this._postRepository.countPostsFromDay(
+      ? await this._postRepository.countMeteredPostsFrom(
           orgId,
           this._subscriptionService
             .currentPeriodStart(subscription.createdAt)
@@ -1234,15 +1234,18 @@ export class PostsService {
     // a post waiting for approval is stored as a draft so no workflow starts
     const type = pendingApproval ? 'draft' : body.type;
     if (type === 'schedule' || type === 'now') {
+      const values = body.posts
+        .filter((p) => this.isMeteredProvider((p.settings as any)?.__type))
+        .flatMap((p) => p.value || []);
+      const ids = values.map((v) => v.id).filter(Boolean) as string[];
+      // rows already queued or published were counted when they were queued;
+      // anything else (new rows, drafts, unknown ids) is counted now
       await this.checkMeteredPosts(
         orgId,
-        body.posts
-          .filter((p) => this.isMeteredProvider((p.settings as any)?.__type))
-          // rows with an id already exist and were counted when created
-          .reduce(
-            (all, p) => all + (p.value || []).filter((v) => !v.id).length,
-            0
-          )
+        values.length -
+          (ids.length
+            ? await this._postRepository.countQueuedOrPublished(orgId, ids)
+            : 0)
       );
     }
     for (const post of body.posts) {

@@ -27,8 +27,16 @@ import {
   SubscriptionException,
 } from '@gitroom/backend/services/auth/permissions/permission.exception.class';
 
-// copilot requests that reach the model; info, connect and stop do not
-const MODEL_METHODS = ['agent/run', 'agent/suggest', 'transcribe'];
+// copilot requests that never reach the model; every other request is charged
+const FREE_METHODS = [
+  'info',
+  'agent/connect',
+  'agent/stop',
+  'inspector/metadata',
+  'inspector/learning',
+  'threads/list',
+  'threads/subscribe',
+];
 
 export type ChannelsContext = {
   integrations: string;
@@ -55,7 +63,7 @@ export class CopilotController {
 
   private async chargeAiText(req: Request, organization: Organization) {
     if (
-      MODEL_METHODS.includes(req?.body?.method) &&
+      !FREE_METHODS.includes(req?.body?.method) &&
       !(await this._subscriptionService.useAiTextCredit(organization))
     ) {
       throw new SubscriptionException({
